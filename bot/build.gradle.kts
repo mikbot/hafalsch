@@ -14,13 +14,14 @@ repositories {
 }
 
 dependencies {
+    @Suppress("DependencyOnStdlib")
     compileOnly(kotlin("stdlib-jdk8"))
     mikbot("dev.schlaubi", "mikbot-api", "3.3.0-SNAPSHOT")
     ksp("dev.schlaubi", "mikbot-plugin-processor", "2.2.0")
     ksp("com.kotlindiscord.kord.extensions", "annotation-processor", "1.5.5-MIKBOT-SNAPSHOT")
 
     implementation(projects.marudorClient)
-    implementation("info.debatty:java-string-similarity:2.0.0")
+    implementation("info.debatty", "java-string-similarity", "2.0.0")
 }
 
 mikbotPlugin {
@@ -43,6 +44,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "18"
+            freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
         }
     }
 
