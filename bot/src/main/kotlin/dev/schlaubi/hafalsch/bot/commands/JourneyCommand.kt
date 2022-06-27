@@ -1,7 +1,6 @@
 package dev.schlaubi.hafalsch.bot.commands
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalTimestamp
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
@@ -11,6 +10,7 @@ import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.editingPaginator
 import dev.kord.core.behavior.interaction.suggestString
 import dev.kord.x.emoji.Emojis
+import dev.schlaubi.hafalsch.bot.command.optionalDate
 import dev.schlaubi.hafalsch.bot.command.optionalStation
 import dev.schlaubi.hafalsch.bot.command.profile
 import dev.schlaubi.hafalsch.bot.ui.DiscordColors
@@ -72,7 +72,7 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
         description = "commands.journey.arguments.station.description"
     }
 
-    val date by optionalTimestamp {
+    val date by optionalDate {
         name = "date"
         description = "commands.journey.arguments.date.description"
     }
@@ -89,7 +89,7 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
         val journey = marudor.hafas.details(
             arguments.name,
             arguments.station?.eva,
-            arguments.date?.instant,
+            arguments.date,
             arguments.profile?.profile
         )
             ?: discordError(translate("commands.journey.not_found", arrayOf(arguments.name)))
