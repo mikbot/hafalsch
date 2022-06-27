@@ -47,10 +47,10 @@ suspend fun Extension.stationCommand() = publicSlashCommand(::StationArguments) 
                         "[Map](https://www.google.com/maps/search/${station.position.latitude}%2C+${station.position.longitude})"
                 }
 
-                if (map != null) {
+                if (map?.map != null) {
                     field {
                         name = translate("station.map")
-                        value = map.map
+                        value = map.map!!
                     }
                 }
             }

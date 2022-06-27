@@ -68,4 +68,4 @@ public sealed class TransportType(public val name: String) {
 }
 
 @Serializable
-public data class Map(@SerialName("lageplan") val map: String)
+public data class Map(@SerialName("lageplan") val map: String? = null)
