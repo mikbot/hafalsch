@@ -183,7 +183,7 @@ private fun Stop.Date?.render(): String {
         return "~~${scheduledTime!!.toDiscord(TimestampType.ShortTime)}~~ ${time.toDiscord(TimestampType.ShortTime)} (+$delay)"
     }
 
-    return time.toDiscord(TimestampType.LongTime)
+    return time.toDiscord(TimestampType.ShortTime)
 }
 
 private fun Stop.renderPlatform(): String? {
