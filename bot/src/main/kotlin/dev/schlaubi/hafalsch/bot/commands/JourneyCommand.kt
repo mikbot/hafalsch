@@ -10,8 +10,11 @@ import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.editingPaginator
 import dev.kord.core.behavior.interaction.suggestString
+import dev.kord.x.emoji.Emojis
 import dev.schlaubi.hafalsch.bot.command.optionalStation
 import dev.schlaubi.hafalsch.bot.command.profile
+import dev.schlaubi.hafalsch.bot.ui.DiscordColors
+import dev.schlaubi.hafalsch.bot.ui.getLoadForValue
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.HafasJourneyMatchJourney
 import dev.schlaubi.hafalsch.marudor.entity.Stop
@@ -51,7 +54,6 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
             coroutineScope {
                 val matchingInput = fetchSafe(input)
                 val matchingType = fetchSafe(type)
-//                val all = fetchSafe("")
                 val results = (matchingInput.sortByRelevance() + matchingType.sortByRelevance())
                     .distinctBy { it.train.name }
 
@@ -90,44 +92,71 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
             arguments.date?.instant,
             arguments.profile?.profile
         )
-            ?: discordError(translate("commands.journey.not_found", arguments.name))
+            ?: discordError(translate("commands.journey.not_found", arrayOf(arguments.name)))
 
         val selectedEva = journey.currentStop?.station?.id
         val selectedIndex = selectedEva?.let { journey.stops.indexOfFirst { it.station.id == selectedEva } }
 
         editingPaginator {
-            journey.stops.forEach { stop ->
+            journey.stops.forEachIndexed { index, stop ->
                 page {
                     title = "${journey.train.name} - ${stop.station.title}"
                     url = marudor.hafas.detailsRedirect(journey.journeyId)
 
-                    val messages = stop.irisMessages
+                    val hafasMessages = stop.messages.map { it.txtN }
+
+                    val irisMessages = stop.irisMessages
                         .filter { it.head == null }
-                        .joinToString("\n") {
-                            "${it.timestamp.toDiscord(TimestampType.LongTime)}: ${it.text}".cancel(
+                        .map {
+                            "${it.timestamp.toDiscord(TimestampType.ShortTime)}: ${it.text}".cancel(
                                 it.superseded
                             )
                         }
 
-                    description = messages
+
+                    description = (hafasMessages + irisMessages).joinToString("\n")
+                    val delay = stop.departure?.delay ?: stop.arrival?.delay
+                    color = when {
+                        stop.additional -> DiscordColors.GREEN
+                        stop.cancelled -> DiscordColors.FUCHSIA
+                        delay != null && delay > 0 -> DiscordColors.RED
+                        delay != null && delay <= 0 -> DiscordColors.BLURLPLE
+
+                        else -> DiscordColors.BLACK
+                    }
+
+                    field {
+                        name = translate("journey.operator")
+                        value = journey.train.operator.name
+                    }
 
                     if (stop.arrival != null) {
                         field {
-                            name = "Arrival"
+                            name = translate("journey.arrival")
                             value = stop.arrival.render()
                         }
                     }
                     if (stop.departure != null) {
                         field {
-                            name = "Departure"
+                            name = translate("journey.departure")
                             value = stop.departure.render()
                         }
                     }
                     val platform = stop.renderPlatform()
                     if (platform != null) {
                         field {
-                            name = "Platform"
+                            name = translate("journey.platform")
                             value = platform
+                        }
+                    }
+                    val load = stop.load
+                    if (load != null) {
+                        field {
+                            name = translate("journey.load")
+                            value = """
+                                ${Emojis.one}: ${getLoadForValue(load.first)}
+                                ${Emojis.two}: ${getLoadForValue(load.second)}
+                            """.trimIndent()
                         }
                     }
                 }
@@ -151,7 +180,7 @@ private fun Stop.Date?.render(): String {
     }
 
     if (scheduledTime != null && delay != null && delay != 0) {
-        return "~~${scheduledTime!!.toDiscord(TimestampType.LongTime)}~~ ${time.toDiscord(TimestampType.LongTime)} (+$delay)"
+        return "~~${scheduledTime!!.toDiscord(TimestampType.ShortTime)}~~ ${time.toDiscord(TimestampType.ShortTime)} (+$delay)"
     }
 
     return time.toDiscord(TimestampType.LongTime)

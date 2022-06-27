@@ -22,8 +22,6 @@ public class MarudorBuilder @PublishedApi internal constructor() {
     internal fun build(): Marudor {
         require(engine == null || httpClient == null) { "Please specify either an engine or an httpClient" }
         val client = (httpClient ?: engine?.let { HttpClient(it) } ?: HttpClient()).config {
-            expectSuccess = true
-
             install(ContentNegotiation) {
                 val json = this@MarudorBuilder.json ?: Json {
                     ignoreUnknownKeys = true

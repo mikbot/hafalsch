@@ -66,3 +66,6 @@ public sealed class TransportType(public val name: String) {
         override fun serialize(encoder: Encoder, value: TransportType): Unit = encoder.encodeString(value.name)
     }
 }
+
+@Serializable
+public data class Map(@SerialName("lageplan") val map: String)

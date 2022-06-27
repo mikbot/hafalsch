@@ -26,7 +26,7 @@ import org.koin.core.component.inject
 
     types = [ConverterType.SINGLE, ConverterType.OPTIONAL]
 )
-class StationArgument(validator: Validator<Station> = null) : SingleConverter<Station>(validator) {
+class StationConverter(validator: Validator<Station> = null) : SingleConverter<Station>(validator) {
     val marudor by inject<Marudor>()
     override val signatureTypeString: String = "Station"
 

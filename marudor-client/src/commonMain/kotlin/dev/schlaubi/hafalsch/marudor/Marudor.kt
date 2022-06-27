@@ -12,6 +12,7 @@ import io.ktor.http.*
 import io.ktor.resources.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import dev.schlaubi.hafalsch.marudor.entity.Map as StopPlaceMap
 import dev.schlaubi.hafalsch.marudor.routes.Hafas as HafasRoute
 import dev.schlaubi.hafalsch.marudor.routes.StopPlace as StopPlaceRoute
 
@@ -81,6 +82,18 @@ public class Marudor(public val resoures: MarudorResources) {
          */
         public suspend fun byEva(eva: String): Station? =
             resoures.client.get(StopPlaceRoute.StopPlaceByEva(eva)).catchNotFoundBody()
+
+        /**
+         * Retrieves a [StopPlaceMap] by an [eva] and a [name].
+         */
+        public suspend fun map(eva: String, name: String): StopPlaceMap? =
+            resoures.client.get(StopPlaceRoute.Map(name, eva)).catchNotFoundBody()
+
+        /**
+         * Retrieves the [StopPlaceMap] for a [Station].
+         */
+        public suspend fun map(station: Station): StopPlaceMap? =
+            map(station.eva, station.name)
     }
 
     private inline fun <reified T> buildUrl(resource: T): String {

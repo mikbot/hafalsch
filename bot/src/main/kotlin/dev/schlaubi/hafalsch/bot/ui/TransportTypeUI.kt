@@ -5,7 +5,7 @@ import dev.schlaubi.hafalsch.marudor.entity.TransportType
 
 val TransportType.emoji: String?
     get() = when (this) {
-        TransportType.Bus -> "<:ecitaro:941801084173832213>"
+        TransportType.Bus -> BUS_EMOJI
         TransportType.CityTrain -> Emojis.metro.toString()
         TransportType.HighSpeedTrain -> Emojis.bullettrainFront.toString()
         TransportType.InterCityTrain -> Emojis.train.toString()

@@ -1,4 +1,6 @@
+import dev.schlaubi.mikbot.gradle.GenerateDefaultTranslationBundleTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Locale
 
 plugins {
     id("com.google.devtools.ksp") version "1.7.0-1.0.6"
@@ -23,6 +25,8 @@ dependencies {
 
 mikbotPlugin {
     description.set("Plugin providing Discord Trainzzz")
+    pluginId.set("hafalsch")
+    bundle.set("hafalsch")
     provider.set("Schlaubi")
     license.set("MIT")
 }
@@ -40,5 +44,13 @@ tasks {
         kotlinOptions {
             jvmTarget = "18"
         }
+    }
+
+    val generateDefaultResourceBundle = task<GenerateDefaultTranslationBundleTask>("generateDefaultResourceBundle") {
+        defaultLocale.set(Locale("en", "GB"))
+    }
+
+    assemblePlugin {
+        dependsOn(generateDefaultResourceBundle)
     }
 }
