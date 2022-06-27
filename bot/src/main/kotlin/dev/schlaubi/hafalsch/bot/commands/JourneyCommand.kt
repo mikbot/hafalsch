@@ -7,16 +7,19 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.types.editingPaginator
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.interaction.suggestString
 import dev.kord.x.emoji.Emojis
 import dev.schlaubi.hafalsch.bot.command.optionalDate
 import dev.schlaubi.hafalsch.bot.command.optionalStation
 import dev.schlaubi.hafalsch.bot.command.profile
+import dev.schlaubi.hafalsch.bot.core.sendStation
+import dev.schlaubi.hafalsch.bot.paginator.multiButtonPaginator
 import dev.schlaubi.hafalsch.bot.ui.DiscordColors
 import dev.schlaubi.hafalsch.bot.ui.getLoadForValue
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.HafasJourneyMatchJourney
+import dev.schlaubi.hafalsch.marudor.entity.HafasMessage
 import dev.schlaubi.hafalsch.marudor.entity.Stop
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.mikbot.plugin.api.util.safeInput
@@ -54,8 +57,8 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
             coroutineScope {
                 val matchingInput = fetchSafe(input)
                 val matchingType = fetchSafe(type)
-                val results = (matchingInput.sortByRelevance() + matchingType.sortByRelevance())
-                    .distinctBy { it.train.name }
+                val results =
+                    (matchingInput.sortByRelevance() + matchingType.sortByRelevance()).distinctBy { it.train.name }
 
                 suggestString {
                     results.take(25).forEach {
@@ -85,33 +88,32 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
     description = "commands.journey.description"
     val marudor by inject<Marudor>()
 
-    action {
+    action commandAction@{
         val journey = marudor.hafas.details(
-            arguments.name,
-            arguments.station?.eva,
-            arguments.date,
-            arguments.profile?.profile
-        )
-            ?: discordError(translate("commands.journey.not_found", arrayOf(arguments.name)))
+            arguments.name, arguments.station?.eva, arguments.date, arguments.profile?.profile
+        ) ?: discordError(translate("commands.journey.not_found", arrayOf(arguments.name)))
 
         val selectedEva = journey.currentStop?.station?.id
-        val selectedIndex = selectedEva?.let { journey.stops.indexOfFirst { it.station.id == selectedEva } }
+        val selectedIndex = selectedEva?.run { journey.stops.indexOfFirst { it.station.id == selectedEva } }
+        val pagesWithOrder = journey.stops.asSequence()
+            .withIndex()
+            .filter { (_, stop) -> stop.arrival?.hasWaggonOrder == true || stop.departure?.hasWaggonOrder == true }
+            .map(IndexedValue<*>::index)
+            .toList()
 
-        editingPaginator {
-            journey.stops.forEachIndexed { index, stop ->
-                page {
+        multiButtonPaginator {
+            journey.stops.forEach { stop ->
+                parent.page {
                     title = "${journey.train.name} - ${stop.station.title}"
                     url = marudor.hafas.detailsRedirect(journey.journeyId)
 
-                    val hafasMessages = stop.messages.map { it.txtN }
+                    val hafasMessages = stop.messages.map(HafasMessage::txtN)
 
-                    val irisMessages = stop.irisMessages
-                        .filter { it.head == null }
-                        .map {
-                            "${it.timestamp.toDiscord(TimestampType.ShortTime)}: ${it.text}".cancel(
-                                it.superseded
-                            )
-                        }
+                    val irisMessages = stop.irisMessages.filter { it.head == null }.map {
+                        "${it.timestamp.toDiscord(TimestampType.ShortTime)}: ${it.text}".cancel(
+                            it.superseded
+                        )
+                    }
 
 
                     description = (hafasMessages + irisMessages).joinToString("\n")
@@ -157,6 +159,31 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
                                 ${Emojis.one}: ${getLoadForValue(load.first)}
                                 ${Emojis.two}: ${getLoadForValue(load.second)}
                             """.trimIndent()
+                        }
+                    }
+                }
+            }
+            ephemeralButton(2) {
+                label = translate("journey.station_info")
+
+                action {
+                    respond {
+                        val stationSegment = journey.stops[it.currentPageNum].station
+                        val station = marudor.stopPlace.byEva(stationSegment.id)
+                            ?: discordError(translate("journey.station.not_found"))
+
+                        sendStation({ translate(it) }, marudor, station)
+                    }
+                }
+            }
+
+            if (pagesWithOrder.isNotEmpty()) {
+                ephemeralButton(2, pagesWithOrder) {
+                    label = translate("journey.waggon_order")
+
+                    action {
+                        respond {
+                            content = "Wagenreihung"
                         }
                     }
                 }
