@@ -24,8 +24,8 @@ public data class JourneyInformation(
     @SerialName("auslastung")
     val load: Load? = null,
     val messages: List<HafasMessage> = emptyList(),
-    val tarifSet: TarifSet,
-    val plannedSequence: Sequence,
+    val tarifSet: TarifSet? = null,
+    val plannedSequence: Sequence? = null,
     val type: String,
     val arrival: Stop.Date,
     val departure: Stop.Date,
@@ -84,14 +84,14 @@ public data class Stop(
         val time: Instant,
         val delay: Int? = null,
         @SerialName("reihung")
-        val hasWaggonOrder: Boolean,
+        val hasWaggonOrder: Boolean = false,
         val messages: List<HafasMessage> = emptyList(),
         val cancelled: Boolean = false
     )
 }
 
 @Serializable
-public data class Load(val first: Int? = null, val second: Int? = null) {
+public data class Load(val first: Load? = null, val second: Load? = null) {
     @Serializable(with = Load.Serializer::class)
     public enum class Load(override val value: Int) : NumberedEnum {
         LOW(1),

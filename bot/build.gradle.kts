@@ -21,7 +21,6 @@ dependencies {
     ksp("com.kotlindiscord.kord.extensions", "annotation-processor", "1.5.5-MIKBOT-SNAPSHOT")
 
     implementation(projects.marudorClient)
-    implementation("info.debatty", "java-string-similarity", "2.0.0")
 }
 
 mikbotPlugin {

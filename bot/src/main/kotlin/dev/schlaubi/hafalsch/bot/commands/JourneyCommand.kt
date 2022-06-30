@@ -23,14 +23,8 @@ import dev.schlaubi.hafalsch.marudor.entity.HafasMessage
 import dev.schlaubi.hafalsch.marudor.entity.Stop
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.mikbot.plugin.api.util.safeInput
-import info.debatty.java.stringsimilarity.Levenshtein
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.koin.core.component.inject
-
-private val levensthein = Levenshtein()
 
 class JourneyArguments : Arguments(), KordExKoinComponent {
     private val marudor by inject<Marudor>()
@@ -41,24 +35,12 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
 
         autoComplete {
             val input = focusedOption.safeInput
-            val type = input.substringBefore(' ')
-
-            suspend fun Deferred<List<HafasJourneyMatchJourney>>.sortByRelevance() =
-                await().sortedBy { levensthein.distance(input, it.train.name) }
-
-            fun CoroutineScope.fetchSafeAsync(input: String) = async {
-                runCatching {
-                    marudor.hafas.journeyMatch(input)
-                }.getOrElse {
-                    emptyList()
-                }
-            }
 
             coroutineScope {
-                val matchingInput = fetchSafeAsync(input)
-                val matchingType = fetchSafeAsync(type)
-                val results = (matchingInput.sortByRelevance() + matchingType.sortByRelevance())
-                    .distinctBy { it.train.name }
+                val results = marudor.hafas.journeyMatch(input.substringBefore(' '))
+                    .sortedBy {
+                        it.train.name.withIndex().count { (index, value) -> input.getOrNull(index) == value }
+                    }
 
                 suggestString {
                     results.take(25).forEach {
@@ -104,7 +86,8 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
         multiButtonPaginator {
             journey.stops.forEach { stop ->
                 parent.page {
-                    title = "${journey.train.name} - ${stop.station.title}"
+                    val journeyName = "${journey.train.name} - ${stop.station.title}"
+                    title = if (journey.cancelled) translate("journey.wannabe", arrayOf(journeyName)) else journeyName
                     url = marudor.hafas.detailsRedirect(journey.journeyId)
 
                     val hafasMessages = stop.messages.map(HafasMessage::txtN)

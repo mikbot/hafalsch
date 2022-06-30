@@ -12,7 +12,7 @@ public data class IrisMessage(
     val timestamp: Instant? = null,
     val superseded: Boolean = false,
     val priority: Priority? = null,
-    val value: Int,
+    val value: Int? = null,
     val stopPlace: HafasStation? = null
 ) {
     @Serializable(with = Priority.Serializer::class)

@@ -30,10 +30,12 @@ context(Command)
             value = station.availableTransports.mapNotNull(TransportType::emoji).joinToString("")
         }
 
-        field {
-            name = translate("station.location")
-            value =
-                "[Map](https://www.google.com/maps/search/${station.position.latitude}%2C+${station.position.longitude})"
+        if (station.position != null) {
+            field {
+                name = translate("station.location")
+                value =
+                    "[Map](https://www.google.com/maps/search/${station.position?.latitude}%2C+${station.position?.longitude})"
+            }
         }
 
         if (map?.map != null) {
