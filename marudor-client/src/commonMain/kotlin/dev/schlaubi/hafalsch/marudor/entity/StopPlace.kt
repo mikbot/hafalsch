@@ -15,8 +15,8 @@ public data class Station(
     val eva: String,
     val name: String,
     val availableTransports: List<TransportType>,
-    val position: Position,
-    val identifier: Identifier
+    val position: Position? = null,
+    val identifier: Identifier? = null
 ) {
     @Serializable
     public data class Identifier(
@@ -29,9 +29,7 @@ public data class Station(
     )
 }
 
-@Serializable
-public data class Position(val latitude: Double, val longitude: Double)
-
+// Items Enum: "FERRY" "FLIGHT" "CAR" "TAXI" "SHUTTLE" "BIKE" "SCOOTER" "WALK" "UNKNOWN"
 @Serializable(with = TransportType.Serializer::class)
 public sealed class TransportType(public val name: String) {
     public object Tram : TransportType("TRAM")
@@ -42,6 +40,13 @@ public sealed class TransportType(public val name: String) {
     public object InterRegionalTrain : TransportType("INTER_REGIONAL_TRAIN")
     public object CityTrain : TransportType("CITY_TRAIN")
     public object InterCityTrain : TransportType("INTERCITY_TRAIN")
+    public object Ferry : TransportType("FERRY")
+    public object Flight : TransportType("FLIGHT")
+    public object Car : TransportType("CAR")
+    public object Taxi : TransportType("TAXI")
+    public object Shuttle : TransportType("SHUTTLE")
+    public object Bike : TransportType("BIKE")
+    public object Scooter : TransportType("SCOOTER")
     public class Unknown(name: String) : TransportType(name)
 
     override fun toString(): String = name
@@ -59,6 +64,13 @@ public sealed class TransportType(public val name: String) {
                 "INTER_REGIONAL_TRAIN" -> InterRegionalTrain
                 "CITY_TRAIN" -> CityTrain
                 "INTERCITY_TRAIN" -> InterCityTrain
+                "FERRY" -> Ferry
+                "FLIGHT" -> Flight
+                "CAR" -> Car
+                "TAXI" -> Taxi
+                "SHUTTLE" -> Shuttle
+                "BIKE" -> Bike
+                "SCOOTER" -> Scooter
                 else -> Unknown(name)
             }
         }

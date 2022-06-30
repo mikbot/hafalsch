@@ -1,5 +1,7 @@
 package dev.schlaubi.hafalsch.marudor.entity
 
+import dev.schlaubi.hafalsch.marudor.util.NumberedEnum
+import dev.schlaubi.hafalsch.marudor.util.NumberedEnumSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -7,8 +9,20 @@ import kotlinx.serialization.Serializable
 public data class IrisMessage(
     val text: String,
     val head: String? = null,
-    val timestamp: Instant,
+    val timestamp: Instant? = null,
     val superseded: Boolean = false,
-    val priority: Long? = null, // actually Int, but it is a String and kx.ser can parse strings as longs iirc
-    val value: Int? = null
-)
+    val priority: Priority? = null,
+    val value: Int,
+    val stopPlace: HafasStation? = null
+) {
+    @Serializable(with = Priority.Serializer::class)
+    public enum class Priority(override val value: Int) : NumberedEnum {
+        HIGH(1),
+        MEDIUM(2),
+        LOW(3),
+        DONE(4);
+        internal companion object Serializer : NumberedEnumSerializer<Priority>(enumValues()) {
+            override val name: String = "Priority"
+        }
+    }
+}

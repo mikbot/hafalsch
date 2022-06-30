@@ -1,5 +1,7 @@
 package dev.schlaubi.hafalsch.marudor.entity
 
+import dev.schlaubi.hafalsch.marudor.util.NumberedEnum
+import dev.schlaubi.hafalsch.marudor.util.NumberedEnumSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,7 +11,7 @@ import kotlinx.serialization.json.JsonObject
 public data class JourneyInformation(
     val cancelled: Boolean = false,
     val changeDuration: Int? = null,
-    val duration: Int,
+    val duration: Int? = null,
     val finalDestination: String,
     @SerialName("jid")
     val journeyId: String,
@@ -21,7 +23,9 @@ public data class JourneyInformation(
     val train: Train,
     @SerialName("auslastung")
     val load: Load? = null,
-    val messages: List<HafasMessage>,
+    val messages: List<HafasMessage> = emptyList(),
+    val tarifSet: TarifSet,
+    val plannedSequence: Sequence,
     val type: String,
     val arrival: Stop.Date,
     val departure: Stop.Date,
@@ -29,18 +33,32 @@ public data class JourneyInformation(
     val currentStop: Stop? = null
 )
 
+@Serializable
+public data class TarifSet(val fares: List<Fare>)
+
+@Serializable
+public data class Fare(
+    val price: Int,
+    val moreExpensiveAvailable: Boolean,
+    val bookable: Boolean,
+    val upsell: Boolean,
+    val targetContext: String
+)
+
+@Serializable
+public data class Sequence(val rawType: String, val shortType: String, val type: String)
 
 @Serializable
 public data class Product(
     val name: String,
-    val number: String,
+    val number: String? = null,
     val icoX: Int,
     val cls: Int,
-    val oprX: Int,
-    val prodCtx: JsonObject,
-    val addName: String,
-    val nameS: String,
-    val machId: String
+    val oprX: Int? = null,
+    val prodCtx: JsonObject? = null,
+    val addName: String? = null,
+    val nameS: String? = null,
+    val machId: String? = null
 )
 
 @Serializable
@@ -62,7 +80,7 @@ public data class Stop(
     public data class Date(
         val scheduledPlatform: String? = null,
         val platform: String? = null,
-        val scheduledTime: Instant? = null,
+        val scheduledTime: Instant,
         val time: Instant,
         val delay: Int? = null,
         @SerialName("reihung")
@@ -73,7 +91,19 @@ public data class Stop(
 }
 
 @Serializable
-public data class Load(val first: Int? = null, val second: Int? = null)
+public data class Load(val first: Int? = null, val second: Int? = null) {
+    @Serializable(with = Load.Serializer::class)
+    public enum class Load(override val value: Int) : NumberedEnum {
+        LOW(1),
+        HIGH(2),
+        VERY_HIGH(3),
+        SOLD_OUT(5);
+
+        internal companion object Serializer : NumberedEnumSerializer<Load>(enumValues()) {
+            override val name: String = "Load"
+        }
+    }
+}
 
 @Serializable
 public data class HafasMessage(
@@ -90,15 +120,15 @@ public data class HafasMessage(
 @Serializable
 public data class Train(
     val name: String,
-    val line: String,
-    val number: String,
-    val type: String,
-    val operator: Operator,
-    val admin: String
-) {
-    @Serializable
-    public data class Operator(
-        val name: String,
-        val icoX: Int
-    )
-}
+    val line: String? = null,
+    val number: String? = null,
+    val type: String? = null,
+    val operator: Operator? = null,
+    val admin: String? = null
+)
+
+@Serializable
+public data class Operator(
+    val name: String,
+    val icoX: Int
+)

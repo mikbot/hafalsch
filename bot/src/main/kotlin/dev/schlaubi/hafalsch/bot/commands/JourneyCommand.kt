@@ -46,7 +46,7 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
             suspend fun Deferred<List<HafasJourneyMatchJourney>>.sortByRelevance() =
                 await().sortedBy { levensthein.distance(input, it.train.name) }
 
-            fun CoroutineScope.fetchSafe(input: String) = async {
+            fun CoroutineScope.fetchSafeAsync(input: String) = async {
                 runCatching {
                     marudor.hafas.journeyMatch(input)
                 }.getOrElse {
@@ -55,10 +55,10 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
             }
 
             coroutineScope {
-                val matchingInput = fetchSafe(input)
-                val matchingType = fetchSafe(type)
-                val results =
-                    (matchingInput.sortByRelevance() + matchingType.sortByRelevance()).distinctBy { it.train.name }
+                val matchingInput = fetchSafeAsync(input)
+                val matchingType = fetchSafeAsync(type)
+                val results = (matchingInput.sortByRelevance() + matchingType.sortByRelevance())
+                    .distinctBy { it.train.name }
 
                 suggestString {
                     results.take(25).forEach {
@@ -109,11 +109,16 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
 
                     val hafasMessages = stop.messages.map(HafasMessage::txtN)
 
-                    val irisMessages = stop.irisMessages.filter { it.head == null }.map {
-                        "${it.timestamp.toDiscord(TimestampType.ShortTime)}: ${it.text}".cancel(
-                            it.superseded
-                        )
-                    }
+                    val irisMessages = stop.irisMessages
+                        .filter { it.head == null }
+                        .map {
+                            buildString {
+                                if (it.timestamp != null) {
+                                    append(it.timestamp!!.toDiscord(TimestampType.ShortTime)).append(':')
+                                }
+                                append(it.text.cancel(it.superseded))
+                            }
+                        }
 
 
                     description = (hafasMessages + irisMessages).joinToString("\n")
@@ -127,9 +132,11 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
                         else -> DiscordColors.BLACK
                     }
 
-                    field {
-                        name = translate("journey.operator")
-                        value = journey.train.operator.name
+                    if (journey.train.operator != null) {
+                        field {
+                            name = translate("journey.operator")
+                            value = journey.train.operator!!.name
+                        }
                     }
 
                     if (stop.arrival != null) {
@@ -206,8 +213,8 @@ private fun Stop.Date?.render(): String {
         return "<unknown>"
     }
 
-    if (scheduledTime != null && delay != null && delay != 0) {
-        return "~~${scheduledTime!!.toDiscord(TimestampType.ShortTime)}~~ ${time.toDiscord(TimestampType.ShortTime)} (+$delay)"
+    if (delay != null && delay != 0) {
+        return "~~${scheduledTime.toDiscord(TimestampType.ShortTime)}~~ ${time.toDiscord(TimestampType.ShortTime)} (+$delay)"
     }
 
     return time.toDiscord(TimestampType.ShortTime)
