@@ -12,7 +12,9 @@ import io.ktor.http.*
 import io.ktor.resources.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import dev.schlaubi.hafalsch.marudor.entity.CoachSequence as CoachSequenceEntity
 import dev.schlaubi.hafalsch.marudor.entity.Map as StopPlaceMap
+import dev.schlaubi.hafalsch.marudor.routes.CoachSequence as CoachSequenceRoute
 import dev.schlaubi.hafalsch.marudor.routes.Hafas as HafasRoute
 import dev.schlaubi.hafalsch.marudor.routes.StopPlace as StopPlaceRoute
 
@@ -20,6 +22,7 @@ public class Marudor(public val resoures: MarudorResources) {
 
     public val hafas: Hafas = Hafas()
     public val stopPlace: StopPlace = StopPlace()
+    public val coachSequence: CoachSequence = CoachSequence()
 
     public inner class Hafas {
         /**
@@ -94,6 +97,20 @@ public class Marudor(public val resoures: MarudorResources) {
          */
         public suspend fun map(station: Station): StopPlaceMap? =
             map(station.eva, station.name)
+    }
+
+    public inner class CoachSequence {
+        /**
+         * Retrieves [coach sequence information][CoachSequenceEntity] for [trainNumber].
+         */
+        public suspend fun coachSequence(
+            trainNumber: Int,
+            departure: Instant,
+            eva: String? = null,
+            initialDeparture: Instant? = null
+        ): CoachSequenceEntity =
+            resoures.client.get(CoachSequenceRoute.V4.CoachSequence(trainNumber, departure, eva, initialDeparture))
+                .body()
     }
 
     private inline fun <reified T> buildUrl(resource: T): String {

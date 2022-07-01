@@ -10,6 +10,9 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 @Serializable
+public data class MinimalStation(val name: String, val evaNumber: String)
+
+@Serializable
 public data class Station(
     @SerialName("evaNumber")
     val eva: String,
@@ -80,4 +83,4 @@ public sealed class TransportType(public val name: String) {
 }
 
 @Serializable
-public data class Map(@SerialName("lageplan") val map: String? = null)
+public class Map(@SerialName("lageplan") public val map: String? = null)

@@ -5,22 +5,16 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
-import com.kotlindiscord.kord.extensions.time.TimestampType
-import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.interaction.suggestString
-import dev.kord.x.emoji.Emojis
 import dev.schlaubi.hafalsch.bot.command.optionalDate
 import dev.schlaubi.hafalsch.bot.command.optionalStation
 import dev.schlaubi.hafalsch.bot.command.profile
-import dev.schlaubi.hafalsch.bot.core.sendStation
+import dev.schlaubi.hafalsch.bot.core.*
 import dev.schlaubi.hafalsch.bot.paginator.multiButtonPaginator
-import dev.schlaubi.hafalsch.bot.ui.DiscordColors
-import dev.schlaubi.hafalsch.bot.ui.getLoadForValue
+import dev.schlaubi.hafalsch.bot.ui.*
+import dev.schlaubi.hafalsch.bot.util.fetchCoachSequence
 import dev.schlaubi.hafalsch.marudor.Marudor
-import dev.schlaubi.hafalsch.marudor.entity.HafasJourneyMatchJourney
-import dev.schlaubi.hafalsch.marudor.entity.HafasMessage
-import dev.schlaubi.hafalsch.marudor.entity.Stop
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.mikbot.plugin.api.util.safeInput
 import kotlinx.coroutines.coroutineScope
@@ -83,75 +77,11 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
             .map(IndexedValue<*>::index)
             .toList()
 
+        val specialTrainEmote = marudor.findSpecialTrainEmote(journey)
+
         multiButtonPaginator {
             journey.stops.forEach { stop ->
-                parent.page {
-                    val journeyName = "${journey.train.name} - ${stop.station.title}"
-                    title = if (journey.cancelled) translate("journey.wannabe", arrayOf(journeyName)) else journeyName
-                    url = marudor.hafas.detailsRedirect(journey.journeyId)
-
-                    val hafasMessages = stop.messages.map(HafasMessage::txtN)
-
-                    val irisMessages = stop.irisMessages
-                        .filter { it.head == null }
-                        .map {
-                            buildString {
-                                if (it.timestamp != null) {
-                                    append(it.timestamp!!.toDiscord(TimestampType.ShortTime)).append(':')
-                                }
-                                append(it.text.cancel(it.superseded))
-                            }
-                        }
-
-
-                    description = (hafasMessages + irisMessages).joinToString("\n")
-                    val delay = stop.departure?.delay ?: stop.arrival?.delay
-                    color = when {
-                        stop.additional -> DiscordColors.GREEN
-                        stop.cancelled -> DiscordColors.FUCHSIA
-                        delay != null && delay > 0 -> DiscordColors.RED
-                        delay != null && delay <= 0 -> DiscordColors.BLURLPLE
-
-                        else -> DiscordColors.BLACK
-                    }
-
-                    if (journey.train.operator != null) {
-                        field {
-                            name = translate("journey.operator")
-                            value = journey.train.operator!!.name
-                        }
-                    }
-
-                    if (stop.arrival != null) {
-                        field {
-                            name = translate("journey.arrival")
-                            value = stop.arrival.render()
-                        }
-                    }
-                    if (stop.departure != null) {
-                        field {
-                            name = translate("journey.departure")
-                            value = stop.departure.render()
-                        }
-                    }
-                    val platform = stop.renderPlatform()
-                    if (platform != null) {
-                        field {
-                            name = translate("journey.platform")
-                            value = platform
-                        }
-                    }
-                    val load = stop.load
-                    if (load != null) {
-                        field {
-                            name = translate("journey.load")
-                            value = """
-                                ${Emojis.one}: ${getLoadForValue(load.first)}
-                                ${Emojis.two}: ${getLoadForValue(load.second)}
-                            """.trimIndent()
-                        }
-                    }
-                }
+                renderStopInfo(journey, marudor, stop, specialTrainEmote)
             }
             ephemeralButton(2) {
                 label = translate("journey.station_info")
@@ -172,8 +102,15 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
                     label = translate("journey.waggon_order")
 
                     action {
-                        respond {
-                            content = "Wagenreihung"
+
+                        val stop = journey.stops[it.currentPageNum]
+                        val sequence = with(marudor) { journey.fetchCoachSequence(stop) }
+                        if (sequence == null) {
+                            respond {
+                                content = translate("journey.coach_sequence.not_found")
+                            }
+                        } else {
+                            sendWaggonOrder(sequence)
                         }
                     }
                 }
@@ -189,27 +126,3 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
     }
 }
 
-private fun String.cancel(cancel: Boolean) = if (cancel) "~~$this~~" else this
-
-private fun Stop.Date?.render(): String {
-    if (this == null) {
-        return "<unknown>"
-    }
-
-    if (delay != null && delay != 0) {
-        return "~~${scheduledTime.toDiscord(TimestampType.ShortTime)}~~ ${time.toDiscord(TimestampType.ShortTime)} (+$delay)"
-    }
-
-    return time.toDiscord(TimestampType.ShortTime)
-}
-
-private fun Stop.renderPlatform(): String? {
-    val scheduled = arrival?.scheduledPlatform ?: departure?.scheduledPlatform
-    val actual = arrival?.platform ?: departure?.platform
-
-    if (scheduled != null) {
-        return "~~$scheduled~~ $actual"
-    }
-
-    return actual
-}
