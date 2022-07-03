@@ -7,7 +7,7 @@ import com.kotlindiscord.kord.extensions.pagination.EXPAND_EMOJI
 import com.kotlindiscord.kord.extensions.pagination.SWITCH_EMOJI
 import com.kotlindiscord.kord.extensions.pagination.pages.Pages
 import dev.kord.core.behavior.UserBehavior
-import dev.kord.core.behavior.interaction.response.PublicMessageInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.response.edit
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.rest.builder.message.modify.embed
@@ -29,7 +29,7 @@ class MultiButtonPaginator(
     private val additionalButtons: List<ComponentDescriptor>,
 
 
-    private val interaction: PublicMessageInteractionResponseBehavior,
+    private val interaction: MessageInteractionResponseBehavior,
 ) : BaseButtonPaginator(pages, owner, timeoutSeconds, keepEmbed, switchEmoji, bundle, locale) {
     /** Whether this paginator has been set up for the first time. **/
     var isSetup: Boolean = false
@@ -68,17 +68,20 @@ class MultiButtonPaginator(
         }
     }
 
-    override suspend fun destroy() {
+    override suspend fun destroy() = destroy(true)
+    suspend fun destroy(removeButtons: Boolean) {
         if (!active) {
             return
         }
 
         active = false
 
-        interaction.edit {
-            embed { applyPage() }
+        if (removeButtons) {
+            interaction.edit {
+                embed { applyPage() }
 
-            this.components = mutableListOf()
+                this.components = mutableListOf()
+            }
         }
 
         super.destroy()

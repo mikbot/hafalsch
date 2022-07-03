@@ -110,7 +110,7 @@ public data class HafasMessage(
     val type: String,
     val code: String,
     val icoX: Int,
-    val txtN: String,
+    val txtN: String? = null,
     val txtS: String? = null,
     val prio: Int? = null,
     val sidx: Int? = null

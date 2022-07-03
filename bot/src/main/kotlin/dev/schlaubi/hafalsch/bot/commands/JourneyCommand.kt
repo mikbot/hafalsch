@@ -11,7 +11,7 @@ import dev.schlaubi.hafalsch.bot.command.optionalDate
 import dev.schlaubi.hafalsch.bot.command.optionalStation
 import dev.schlaubi.hafalsch.bot.command.profile
 import dev.schlaubi.hafalsch.bot.core.*
-import dev.schlaubi.hafalsch.bot.paginator.multiButtonPaginator
+import dev.schlaubi.hafalsch.bot.paginator.refreshableMultiButtonPaginator
 import dev.schlaubi.hafalsch.bot.ui.*
 import dev.schlaubi.hafalsch.bot.util.fetchCoachSequence
 import dev.schlaubi.hafalsch.marudor.Marudor
@@ -79,49 +79,63 @@ suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) 
 
         val specialTrainEmote = marudor.findSpecialTrainEmote(journey)
 
-        multiButtonPaginator {
-            journey.stops.forEach { stop ->
-                renderStopInfo(journey, marudor, stop, specialTrainEmote)
+        refreshableMultiButtonPaginator(initialData = journey) {
+            retriever {
+                marudor.hafas.details(
+                    arguments.name, arguments.station?.eva, arguments.date, arguments.profile?.profile
+                ) ?: journey
             }
-            ephemeralButton(2) {
-                label = translate("journey.station_info")
 
-                action {
-                    respond {
-                        val stationSegment = journey.stops[it.currentPageNum].station
-                        val station = marudor.stopPlace.byEva(stationSegment.id)
-                            ?: discordError(translate("journey.station.not_found"))
-
-                        sendStation({ translate(it) }, marudor, station)
-                    }
+            pageBuilder {
+                journey.stops.forEach { stop ->
+                    renderStopInfo(journey, marudor, stop, specialTrainEmote)
                 }
-            }
-
-            if (pagesWithOrder.isNotEmpty()) {
-                ephemeralButton(2, pagesWithOrder) {
-                    label = translate("journey.waggon_order")
+                ephemeralButton(2) {
+                    label = translate("journey.station_info")
 
                     action {
+                        respond {
+                            val stationSegment = journey.stops[it.currentPageNum].station
+                            val station = marudor.stopPlace.byEva(stationSegment.id)
+                                ?: discordError(translate("journey.station.not_found"))
 
-                        val stop = journey.stops[it.currentPageNum]
-                        val sequence = with(marudor) { journey.fetchCoachSequence(stop) }
-                        if (sequence == null) {
-                            respond {
-                                content = translate("journey.coach_sequence.not_found")
+                            sendStation({ translate(it) }, marudor, station)
+                        }
+                    }
+                }
+                if (pagesWithOrder.isNotEmpty()) {
+                    ephemeralButton(2, pagesWithOrder) {
+                        label = translate("journey.waggon_order")
+
+                        action {
+                            val stop = journey.stops[it.currentPageNum]
+                            val sequence = with(marudor) { journey.fetchCoachSequence(stop) }
+                            if (sequence == null) {
+                                respond {
+                                    content = translate("journey.coach_sequence.not_found")
+                                }
+                            } else {
+                                sendWaggonOrder(
+                                    marudor,
+                                    journey,
+                                    stop,
+                                    interactionResponse,
+                                    bundle,
+                                    sequence
+                                )
                             }
-                        } else {
-                            sendWaggonOrder(sequence)
                         }
                     }
                 }
             }
-        }.apply {
-            if (selectedIndex != null) {
-                currentPageNum = selectedIndex
-                currentPage = pages.get(currentGroup, currentPageNum)
 
+            paginatorConfigurator {
+                if (selectedIndex != null) {
+                    currentPageNum = selectedIndex
+                    currentPage = pages.get(currentGroup, currentPageNum)
+
+                }
             }
-            send()
         }
     }
 }
