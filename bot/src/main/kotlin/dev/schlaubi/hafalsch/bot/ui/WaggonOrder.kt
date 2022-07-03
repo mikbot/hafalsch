@@ -26,6 +26,20 @@ suspend fun EphemeralInteractionButtonContext.sendWaggonOrder(coachSequence: Coa
                         }
                     }
 
+                    if (coachSequence.multipleTrainNumbers) {
+                        field {
+                            name = translate("coach_sequence.train_number")
+                            value = group.name
+                        }
+                    }
+
+                    if (coachSequence.multipleDestinations) {
+                        field {
+                            name = translate("coach_sequence.destination")
+                            value = group.destinationName
+                        }
+                    }
+
                     field {
                         name = translate("coach_sequence.model")
                         value = group.model.name
