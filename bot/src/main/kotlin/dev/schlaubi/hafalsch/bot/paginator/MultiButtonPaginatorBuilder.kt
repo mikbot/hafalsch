@@ -14,7 +14,8 @@ import java.util.*
 data class MultiButtonPaginatorBuilder(
     val bundle: String?,
     val parent: PaginatorBuilder,
-    var buttons: MutableList<ComponentDescriptor> = mutableListOf()
+    var buttons: MutableList<ComponentDescriptor> = mutableListOf(),
+    var doFollowUp: Boolean = false
 ) {
     fun publicButton(
         row: Int? = null,
@@ -73,5 +74,10 @@ inline fun multiButtonPaginator(
     val (_, pages, components) = builder
 
 
-    return MultiButtonPaginator(pages.pages, additionalButtons = components, interaction = interactionResponse)
+    return MultiButtonPaginator(
+        pages.pages,
+        doFollowUp = builder.doFollowUp,
+        additionalButtons = components,
+        interaction = interactionResponse
+    )
 }

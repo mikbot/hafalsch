@@ -7,9 +7,13 @@ import com.kotlindiscord.kord.extensions.pagination.EXPAND_EMOJI
 import com.kotlindiscord.kord.extensions.pagination.SWITCH_EMOJI
 import com.kotlindiscord.kord.extensions.pagination.pages.Pages
 import dev.kord.core.behavior.UserBehavior
+import dev.kord.core.behavior.interaction.followup.edit
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.response.createPublicFollowup
 import dev.kord.core.behavior.interaction.response.edit
 import dev.kord.core.entity.ReactionEmoji
+import dev.kord.core.entity.interaction.followup.PublicFollowupMessage
+import dev.kord.rest.builder.message.modify.MessageModifyBuilder
 import dev.kord.rest.builder.message.modify.embed
 import java.util.*
 
@@ -30,10 +34,12 @@ class MultiButtonPaginator(
 
 
     private val interaction: MessageInteractionResponseBehavior,
+    private val doFollowUp: Boolean = false
 ) : BaseButtonPaginator(pages, owner, timeoutSeconds, keepEmbed, switchEmoji, bundle, locale) {
     /** Whether this paginator has been set up for the first time. **/
     var isSetup: Boolean = false
     private lateinit var pageComponents: List<PageComponent>
+    private var followUp: PublicFollowupMessage? = null
 
     override suspend fun setup() {
         super.setup()
@@ -41,7 +47,6 @@ class MultiButtonPaginator(
             PageComponent(it.builder.invoke(components, this), it.pages)
         }
     }
-
 
     override suspend fun send() {
         if (!isSetup) {
@@ -59,11 +64,25 @@ class MultiButtonPaginator(
             }
         }
 
-        interaction.edit {
+        val edit: suspend MessageModifyBuilder.() -> Unit = {
             embed { applyPage() }
 
             with(this@MultiButtonPaginator.components) {
-                this@edit.applyToMessage()
+                applyToMessage()
+            }
+        }
+
+        if (doFollowUp) {
+            if (followUp == null) {
+                followUp = interaction.createPublicFollowup {
+                    content = "loading ..."
+                }
+            }
+            @Suppress("ReplaceNotNullAssertionWithElvisReturn")
+            followUp!!.edit { edit() }
+        } else {
+            interaction.edit {
+                edit()
             }
         }
     }
@@ -77,10 +96,17 @@ class MultiButtonPaginator(
         active = false
 
         if (removeButtons) {
-            interaction.edit {
+            val edit: suspend MessageModifyBuilder.() -> Unit = {
                 embed { applyPage() }
 
                 this.components = mutableListOf()
+            }
+
+            if (followUp != null) {
+                @Suppress("ReplaceNotNullAssertionWithElvisReturn")
+                followUp!!.edit { edit() }
+            } else {
+                interaction.edit { edit() }
             }
         }
 
