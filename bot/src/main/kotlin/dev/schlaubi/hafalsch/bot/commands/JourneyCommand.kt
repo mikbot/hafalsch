@@ -31,10 +31,11 @@ class JourneyArguments : Arguments(), KordExKoinComponent {
             val input = focusedOption.safeInput
 
             coroutineScope {
-                val results = marudor.hafas.journeyMatch(input.substringBefore(' '))
-                    .sortedBy {
-                        it.train.name.withIndex().count { (index, value) -> input.getOrNull(index) == value }
-                    }
+                val matches =
+                    runCatching { marudor.hafas.journeyMatch(input.substringBefore(' ')) }.getOrElse { emptyList() }
+                val results = matches.sortedBy {
+                    it.train.name.withIndex().count { (index, value) -> input.getOrNull(index) == value }
+                }
 
                 suggestString {
                     results.take(25).forEach {
