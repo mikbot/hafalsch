@@ -16,6 +16,7 @@ import dev.schlaubi.hafalsch.marudor.entity.CoachSequence as CoachSequenceEntity
 import dev.schlaubi.hafalsch.marudor.entity.Map as StopPlaceMap
 import dev.schlaubi.hafalsch.marudor.routes.CoachSequence as CoachSequenceRoute
 import dev.schlaubi.hafalsch.marudor.routes.Hafas as HafasRoute
+import dev.schlaubi.hafalsch.marudor.routes.Iris as IrisRoute
 import dev.schlaubi.hafalsch.marudor.routes.StopPlace as StopPlaceRoute
 
 public class Marudor(public val resoures: MarudorResources) {
@@ -23,6 +24,7 @@ public class Marudor(public val resoures: MarudorResources) {
     public val hafas: Hafas = Hafas()
     public val stopPlace: StopPlace = StopPlace()
     public val coachSequence: CoachSequence = CoachSequence()
+    public val iris: Iris = Iris()
 
     public inner class Hafas {
         /**
@@ -111,6 +113,18 @@ public class Marudor(public val resoures: MarudorResources) {
         ): CoachSequenceEntity =
             resoures.client.get(CoachSequenceRoute.V4.CoachSequence(trainNumber, departure, eva, initialDeparture))
                 .body()
+    }
+
+    public inner class Iris {
+        /**
+         * Retrieves the departures for a specific [station][eva].
+         */
+        public suspend fun departures(
+            eva: String,
+            lookahead: Int? = null,
+            lookbehind: Int? = null
+        ): IrisDepartures? =
+            resoures.client.get(IrisRoute.Departures(eva, lookahead, lookbehind)).catchNotFoundBody()
     }
 
     private inline fun <reified T> buildUrl(resource: T): String {

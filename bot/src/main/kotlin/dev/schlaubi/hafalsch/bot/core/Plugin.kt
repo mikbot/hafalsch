@@ -3,6 +3,7 @@ package dev.schlaubi.hafalsch.bot.core
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.loadModule
+import dev.schlaubi.hafalsch.bot.commands.departuresCommand
 import dev.schlaubi.hafalsch.bot.commands.journeyCommand
 import dev.schlaubi.hafalsch.bot.commands.stationCommand
 import dev.schlaubi.hafalsch.marudor.Marudor
@@ -36,5 +37,6 @@ class HafalschModule : Extension() {
     override suspend fun setup() {
         stationCommand()
         journeyCommand()
+        departuresCommand()
     }
 }

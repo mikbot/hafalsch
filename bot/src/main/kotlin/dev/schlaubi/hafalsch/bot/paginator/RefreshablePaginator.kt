@@ -5,6 +5,7 @@ import com.kotlindiscord.kord.extensions.components.buttons.PublicInteractionBut
 import com.kotlindiscord.kord.extensions.components.types.emoji
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
 import dev.kord.x.emoji.Emojis
+import dev.schlaubi.hafalsch.bot.ui.UIContext
 import java.util.*
 import kotlin.experimental.ExperimentalTypeInference
 
@@ -57,6 +58,16 @@ suspend inline fun <T> PublicInteractionButtonContext.refreshableMultiButtonPagi
     @BuilderInference crossinline block: RefreshablePaginatorBuilder<T>.() -> Unit
 ) = refreshableMultiButtonPaginator(
     interactionResponse, component.bundle, defaultGroup, locale, initialData, block
+)
+
+@OptIn(ExperimentalTypeInference::class)
+suspend inline fun <T> UIContext.refreshableMultiButtonPaginator(
+    defaultGroup: String = "",
+    locale: Locale? = null,
+    initialData: T? = null,
+    @BuilderInference crossinline block: RefreshablePaginatorBuilder<T>.() -> Unit
+) = refreshableMultiButtonPaginator(
+    response, bundle, defaultGroup, locale, initialData, block
 )
 
 @OptIn(ExperimentalTypeInference::class)

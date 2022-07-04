@@ -13,6 +13,7 @@ import dev.kord.core.behavior.interaction.response.createPublicFollowup
 import dev.kord.core.behavior.interaction.response.edit
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.interaction.followup.PublicFollowupMessage
+import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
 import dev.kord.rest.builder.message.modify.embed
 import java.util.*
@@ -75,7 +76,9 @@ class MultiButtonPaginator(
         if (doFollowUp) {
             if (followUp == null) {
                 followUp = interaction.createPublicFollowup {
-                    content = "loading ..."
+                    embed {
+                        title = "Loading ..."
+                    }
                 }
             }
             @Suppress("ReplaceNotNullAssertionWithElvisReturn")

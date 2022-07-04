@@ -1,11 +1,9 @@
 package dev.schlaubi.hafalsch.bot.ui
 
-import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import dev.kord.x.emoji.DiscordEmoji
 import dev.kord.x.emoji.Emojis
-import dev.schlaubi.hafalsch.bot.commands.JourneyArguments
 import dev.schlaubi.hafalsch.bot.core.*
 import dev.schlaubi.hafalsch.bot.paginator.MultiButtonPaginatorBuilder
 import dev.schlaubi.hafalsch.bot.util.fetchCoachSequence
@@ -16,19 +14,15 @@ import dev.schlaubi.hafalsch.marudor.entity.Stop
 import dev.schlaubi.stdx.core.isNotNullOrEmpty
 
 
-context(PublicSlashCommandContext<JourneyArguments>)
-        fun MultiButtonPaginatorBuilder.renderStopInfo(
+context(UIContext)
+fun MultiButtonPaginatorBuilder.renderStopInfo(
     journey: JourneyInformation,
-    marudor: Marudor,
     stop: Stop,
     specialTrainEmote: String?
 ) {
     parent.page {
         val journeyName = "${journey.train.name} - ${stop.station.title.replaceStationNames()}"
-        title = if (journey.cancelled) translate(
-            "journey.wannabe",
-            arrayOf(journeyName)
-        ) else journeyName
+        title = if (journey.cancelled) translate("journey.wannabe", journeyName) else journeyName
         url = marudor.hafas.detailsRedirect(journey.journeyId)
 
         val hafasMessages = stop.messages.map(HafasMessage::txtN)
@@ -125,9 +119,7 @@ suspend fun Marudor.findSpecialTrainEmote(journey: JourneyInformation): String? 
         .joinToString("")
 }
 
-private fun String.cancel(cancel: Boolean) = if (cancel) "~~$this~~" else this
-
-private fun Stop.Date?.render(): String {
+fun Stop.Date?.render(): String {
     if (this == null) {
         return "<unknown>"
     }
@@ -138,6 +130,7 @@ private fun Stop.Date?.render(): String {
 
     return time.toDiscord(TimestampType.ShortTime)
 }
+
 
 private fun Stop.renderPlatform(): String? {
     val scheduled = arrival?.scheduledPlatform ?: departure?.scheduledPlatform

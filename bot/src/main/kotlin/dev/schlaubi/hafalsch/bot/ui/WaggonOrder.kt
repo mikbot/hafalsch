@@ -1,23 +1,17 @@
 package dev.schlaubi.hafalsch.bot.ui
 
-import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
-import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
 import dev.schlaubi.hafalsch.bot.paginator.refreshableMultiButtonPaginator
 import dev.schlaubi.hafalsch.bot.util.fetchCoachSequence
-import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.CoachSequence
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
 import dev.schlaubi.hafalsch.marudor.entity.Stop
 
 @Suppress("ConvertLambdaToReference")
-suspend fun SlashCommandContext<*, *>.sendWaggonOrder(
-    marudor: Marudor,
+suspend fun UIContext.sendWaggonOrder(
     journey: JourneyInformation,
     stop: Stop,
-    interactionResponse: MessageInteractionResponseBehavior,
-    bundle: String?,
     coachSequence: CoachSequence
-) = refreshableMultiButtonPaginator(interactionResponse, bundle, initialData = coachSequence) {
+) = refreshableMultiButtonPaginator(initialData = coachSequence) {
     retriever {
         with(marudor) { journey.fetchCoachSequence(stop) ?: coachSequence }
     }
@@ -27,9 +21,9 @@ suspend fun SlashCommandContext<*, *>.sendWaggonOrder(
         coachSequence.sequence.groups.forEach { (coaches, groupName, _, destinationName, trainName, _, model) ->
             coaches.forEach { (_, category, closed, uic, type, identificationNumber, _, features, seats) ->
                 parent.page {
-                    val rawTitle = translate("coach_sequence.title", arrayOf(identificationNumber))
+                    val rawTitle = translate("coach_sequence.title", identificationNumber)
                     title = if (closed) {
-                        translate("journey.wannabe", arrayOf(rawTitle))
+                        translate("journey.wannabe", rawTitle)
                     } else {
                         rawTitle
                     }
