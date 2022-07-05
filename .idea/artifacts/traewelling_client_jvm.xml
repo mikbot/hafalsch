@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="traewelling-client-jvm">
+    <output-path>$PROJECT_DIR$/traewelling-client/build/libs</output-path>
+    <root id="archive" name="traewelling-client-jvm.jar">
+      <element id="module-output" name="hafalsch.traewelling-client.jvmMain" />
+    </root>
+  </artifact>
+</component>

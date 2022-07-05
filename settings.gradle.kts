@@ -2,4 +2,4 @@ rootProject.name = "hafalsch"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-include("marudor-client", "bot")
+include("client-common", "marudor-client", "traewelling-client", "bot")

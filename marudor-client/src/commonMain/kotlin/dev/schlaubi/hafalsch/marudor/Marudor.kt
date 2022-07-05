@@ -1,8 +1,10 @@
 package dev.schlaubi.hafalsch.marudor
 
+import dev.schlaubi.hafalsch.client.ClientCompanion
+import dev.schlaubi.hafalsch.client.ClientResources
+import dev.schlaubi.hafalsch.client.util.safeBody
 import dev.schlaubi.hafalsch.marudor.entity.*
 import dev.schlaubi.hafalsch.marudor.routes.HafasProfile
-import dev.schlaubi.hafalsch.marudor.util.catchNotFoundBody
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.resources.*
@@ -19,7 +21,7 @@ import dev.schlaubi.hafalsch.marudor.routes.Hafas as HafasRoute
 import dev.schlaubi.hafalsch.marudor.routes.Iris as IrisRoute
 import dev.schlaubi.hafalsch.marudor.routes.StopPlace as StopPlaceRoute
 
-public class Marudor(public val resoures: MarudorResources) {
+public class Marudor(public val resoures: ClientResources) {
 
     public val hafas: Hafas = Hafas()
     public val stopPlace: StopPlace = StopPlace()
@@ -33,7 +35,7 @@ public class Marudor(public val resoures: MarudorResources) {
         public suspend fun details(
             trainName: String, station: String? = null, date: Instant? = null, profile: HafasProfile? = null
         ): JourneyInformation? =
-            resoures.client.get(HafasRoute.V2.Details(trainName, station, date, profile)).catchNotFoundBody()
+            resoures.client.get(HafasRoute.V2.Details(trainName, station, date, profile)).safeBody()
 
         /**
          * Returns the details redirect for [journeyId].
@@ -86,13 +88,13 @@ public class Marudor(public val resoures: MarudorResources) {
          * Retrieves the [Station] for [eva].
          */
         public suspend fun byEva(eva: String): Station? =
-            resoures.client.get(StopPlaceRoute.StopPlaceByEva(eva)).catchNotFoundBody()
+            resoures.client.get(StopPlaceRoute.StopPlaceByEva(eva)).safeBody()
 
         /**
          * Retrieves a [StopPlaceMap] by an [eva] and a [name].
          */
         public suspend fun map(eva: String, name: String): StopPlaceMap? =
-            resoures.client.get(StopPlaceRoute.Map(name, eva)).catchNotFoundBody()
+            resoures.client.get(StopPlaceRoute.Map(name, eva)).safeBody()
 
         /**
          * Retrieves the [StopPlaceMap] for a [Station].
@@ -124,7 +126,7 @@ public class Marudor(public val resoures: MarudorResources) {
             lookahead: Int? = null,
             lookbehind: Int? = null
         ): IrisDepartures? =
-            resoures.client.get(IrisRoute.Departures(eva, lookahead, lookbehind)).catchNotFoundBody()
+            resoures.client.get(IrisRoute.Departures(eva, lookahead, lookbehind)).safeBody()
     }
 
     private inline fun <reified T> buildUrl(resource: T): String {
@@ -140,4 +142,8 @@ public class Marudor(public val resoures: MarudorResources) {
 
     public inline fun buildUrl(builder: URLBuilder.() -> Unit = {}): String =
         URLBuilder(resoures.url).apply { encodedPathSegments = emptyList() }.apply(builder).buildString()
+
+    public companion object : ClientCompanion<Marudor, MarudorBuilder> {
+        override fun newBuilder(): MarudorBuilder = MarudorBuilder()
+    }
 }

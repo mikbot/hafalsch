@@ -1,7 +1,7 @@
 package dev.schlaubi.hafalsch.marudor.entity
 
-import dev.schlaubi.hafalsch.marudor.util.NumberedEnum
-import dev.schlaubi.hafalsch.marudor.util.NumberedEnumSerializer
+import dev.schlaubi.hafalsch.client.util.NumberedEnum
+import dev.schlaubi.hafalsch.client.util.NumberedEnumSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

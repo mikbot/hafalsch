@@ -5,6 +5,7 @@ import java.util.Locale
 plugins {
     id("com.google.devtools.ksp") version "1.7.0-1.0.6"
     kotlin("jvm")
+    kotlin("plugin.serialization")
     id("dev.schlaubi.mikbot.gradle-plugin") version "2.4.1"
 }
 
@@ -21,6 +22,8 @@ dependencies {
     ksp("com.kotlindiscord.kord.extensions", "annotation-processor", "1.5.5-MIKBOT-SNAPSHOT")
 
     implementation(projects.marudorClient)
+    implementation(projects.traewellingClient)
+    implementation("io.ktor", "ktor-client-logging", "2.0.3")
 }
 
 mikbotPlugin {

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="client-common-jvm">
+    <output-path>$PROJECT_DIR$/client-common/build/libs</output-path>
+    <root id="archive" name="client-common-jvm.jar">
+      <element id="module-output" name="hafalsch.client-common.jvmMain" />
+    </root>
+  </artifact>
+</component>
