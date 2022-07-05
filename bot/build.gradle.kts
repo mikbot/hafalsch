@@ -24,6 +24,7 @@ dependencies {
     implementation(projects.marudorClient)
     implementation(projects.traewellingClient)
     implementation("io.ktor", "ktor-client-logging", "2.0.3")
+    implementation("info.debatty", "java-string-similarity", "2.0.0")
 }
 
 mikbotPlugin {

@@ -135,7 +135,7 @@ context(Extension)
                                         "@${it.username}"
                                     }
 
-                                    "- $mention (${it.points} pts - $${it.trainDistance} km)"
+                                    "- $mention (${it.points} pts - ${it.trainDistance} km)"
                                 }
                         }
                     }

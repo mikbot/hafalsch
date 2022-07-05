@@ -34,7 +34,8 @@ class ExitConverter(validator: Validator<String> = null) : AutoCompletingArgumen
 
                 val ibnr = stationRaw?.safeIbnr(token) ?: discordError("Please specify a station")
 
-                val (jid, lineName, stopId) = tripRaw?.safeJid(ibnr, token) ?: discordError("No exits found. Invalid trip?")
+                val (jid, lineName, stopId) = tripRaw?.safeJid(ibnr, token)
+                    ?: discordError("No exits found. Invalid trip?")
 
                 val trip = traewelling.trains.trip(
                     jid,
@@ -78,9 +79,11 @@ class ExitConverter(validator: Validator<String> = null) : AutoCompletingArgumen
             )
 
             suggestString {
-                trip.stopOvers.take(25).forEach {
-                    choice(it.stop.name, "$ibnrPrefix${it.stop.id}")
-                }
+                trip.stopOvers
+                    .sortByRelevance(focusedOption.value) { it.stop.name }
+                    .take(25).forEach {
+                        choice(it.stop.name, "$ibnrPrefix${it.stop.id}")
+                    }
             }
         }
     }

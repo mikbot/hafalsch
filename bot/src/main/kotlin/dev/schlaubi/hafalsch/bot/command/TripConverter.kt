@@ -77,6 +77,7 @@ class TripConverter(validator: Validator<JourneyInfo> = null) : AutoCompletingAr
             suggestString {
                 departures.departures
                     .filter { it.direction != null }
+                    .sortByRelevance(focusedOption.value) { it.line.name }
                     .take(25).forEach { departure ->
                         val time = departure.time?.let { format.format(OffsetDateTime.parse(it)) }
                         val timeInfo = buildString {
