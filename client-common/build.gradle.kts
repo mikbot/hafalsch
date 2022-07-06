@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform")
+    `hafalsch-publishing`
 }
 
 kotlin {
