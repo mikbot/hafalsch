@@ -97,7 +97,7 @@ public data class Load(val first: Load? = null, val second: Load? = null) {
         LOW(1),
         HIGH(2),
         VERY_HIGH(3),
-        SOLD_OUT(5);
+        SOLD_OUT(4);
 
         internal companion object Serializer : NumberedEnumSerializer<Load>(enumValues()) {
             override val name: String = "Load"
