@@ -40,8 +40,12 @@ public class Marudor(public val resoures: ClientResources) {
         /**
          * Returns the details redirect for [journeyId].
          */
-        public fun detailsRedirect(journeyId: String, profile: HafasProfile? = null): String =
-            buildUrl(HafasRoute.V1.DetailsRedirect(journeyId, profile))
+        public inline fun detailsRedirect(
+            journeyId: String,
+            profile: HafasProfile? = null,
+            block: URLBuilder.() -> Unit = {}
+        ): String =
+            buildUrl(HafasRoute.V1.DetailsRedirect(journeyId, profile), block)
 
         /**
          * Searches for journeys matching [name] (Useful for autocomplete).
@@ -129,13 +133,15 @@ public class Marudor(public val resoures: ClientResources) {
             resoures.client.get(IrisRoute.Departures(eva, lookahead, lookbehind)).safeBody()
     }
 
-    private inline fun <reified T> buildUrl(resource: T): String {
+    @PublishedApi
+    internal inline fun <reified T> buildUrl(resource: T, block: URLBuilder.() -> Unit = {}): String {
         val format = resoures.client.plugin(Resources).resourcesFormat
 
         val builder = URLBuilder(resoures.url)
         href(format, resource, builder)
 
         builder.pathSegments = resoures.url.pathSegments + builder.pathSegments
+        builder.apply(block)
 
         return builder.buildString()
     }
