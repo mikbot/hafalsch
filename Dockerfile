@@ -6,7 +6,7 @@ RUN gradle --no-daemon bot:installBotArchive
 FROM ibm-semeru-runtimes:open-18-jre-focal
 
 WORKDIR /usr/app
-COPY --from=builder /usr/app/build/installBot .
+COPY --from=builder /usr/app/bot/build/installBot .
 
 LABEL org.opencontainers.image.source = "https://github.com/mikbot/hafalsch"
 
