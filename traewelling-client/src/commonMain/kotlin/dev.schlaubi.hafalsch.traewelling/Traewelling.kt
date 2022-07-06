@@ -10,11 +10,13 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling as TraewellingRoute
+import dev.schlaubi.hafalsch.traewelling.routes.Traewelling.Statuses as StatusesRoute
 
 public class Traewelling internal constructor(private val resources: ClientResources) {
 
     public val auth: Auth = Auth()
     public val trains: Trains = Trains()
+    public val statuses: Statuses = Statuses()
 
     /**
      * Retrieves the user for [token].
@@ -95,6 +97,16 @@ public class Traewelling internal constructor(private val resources: ClientResou
                 setBody(checkInRequest)
             }.body()
 
+    }
+
+    public inner class Statuses {
+        /**
+         * Lists all active statuses for [token].
+         */
+        public suspend fun listEnroute(token: String): StatusesList =
+            resources.client.get(StatusesRoute.EnRoute.All()) {
+                authenticate(token)
+            }.body()
     }
 
     private fun HttpRequestBuilder.authenticate(token: String) {

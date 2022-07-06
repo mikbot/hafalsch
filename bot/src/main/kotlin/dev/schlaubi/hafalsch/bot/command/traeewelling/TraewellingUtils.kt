@@ -1,4 +1,4 @@
-package dev.schlaubi.hafalsch.bot.command
+package dev.schlaubi.hafalsch.bot.command.traeewelling
 
 import com.kotlindiscord.kord.extensions.commands.CommandContext
 import dev.kord.core.behavior.interaction.suggestString

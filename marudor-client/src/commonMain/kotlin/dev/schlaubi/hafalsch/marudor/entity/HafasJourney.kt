@@ -12,7 +12,7 @@ public data class JourneyInformation(
     val cancelled: Boolean = false,
     val changeDuration: Int? = null,
     val duration: Int? = null,
-    val finalDestination: String,
+    val finalDestination: String? = null,
     @SerialName("jid")
     val journeyId: String,
     val product: Product? = null,

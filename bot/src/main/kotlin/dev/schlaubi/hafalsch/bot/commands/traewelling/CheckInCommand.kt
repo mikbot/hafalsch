@@ -11,9 +11,11 @@ import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordExperimental
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.rest.builder.message.create.embed
-import dev.schlaubi.hafalsch.bot.command.*
+import dev.schlaubi.hafalsch.bot.command.traeewelling.*
+import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
+import dev.schlaubi.hafalsch.bot.database.findForJourney
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.hafalsch.traewelling.entity.CheckInRequest
 import dev.schlaubi.hafalsch.traewelling.entity.User
@@ -112,6 +114,16 @@ context(Extension)
             val checkIn = traewelling.trains.checkIn(request, token)
 
             respond {
+                if (Database.checkIns.findForJourney(user.id, arguments.trip.jid) == null) {
+                    val dbCheckIn = CheckIn(
+                        user = user.id,
+                        journeyId = arguments.trip.jid,
+                        start = arguments.trip.station,
+                        end = arguments.exit
+                    )
+
+                    Database.checkIns.save(dbCheckIn)
+                }
                 embed {
                     title = translate("commands.traewelling.check-in.success.title")
                     description = translate(

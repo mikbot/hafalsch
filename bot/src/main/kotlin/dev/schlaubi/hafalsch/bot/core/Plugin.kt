@@ -29,6 +29,7 @@ private data class TraewellingError(val error: String)
 
 @PluginMain
 class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
+    private val traewellingSynchronizer = TraewellingCheckInSynchronizer()
     private val marudor = Marudor()
     private val traewelling = Traewelling {
         url(Config.TRÄWELLING_API)
@@ -64,6 +65,8 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
                     single { marudor }
                     single { traewelling }
                 }
+
+                traewellingSynchronizer.start()
             }
         }
     }

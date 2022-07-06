@@ -91,8 +91,7 @@ public class Traewelling {
         @Serializable
         @Resource("trip")
         public data class Trip(
-            @SerialName("tripID")
-            val tripId: String,
+            @SerialName("tripID") val tripId: String,
             val lineName: String? = null,
             val start: String,
             val trains: Trains = Trains()
@@ -109,5 +108,31 @@ public class Traewelling {
         @Serializable
         @Resource("home")
         public data class Home(val trains: Trains = Trains())
+    }
+
+    @Serializable
+    @Resource("statuses")
+    public data class Statuses(val traewelling: Traewelling = Traewelling()) {
+        @Serializable
+        @Resource("enroute")
+        public data class EnRoute(val statuses: Statuses = Statuses()) {
+            @Serializable
+            @Resource("all")
+            public data class All(val enroute: EnRoute = EnRoute())
+        }
+
+        @Serializable
+        @Resource("event/{id}")
+        public data class Event(val id: Int, val statuses: Statuses = Statuses())
+
+        @Serializable
+        @Resource("{id}")
+        public data class Status(val id: Int) {
+            @Serializable
+            @Resource("like")
+            public data class Like(val status: Status) {
+                public constructor(id: Int) : this(Status(id))
+            }
+        }
     }
 }
