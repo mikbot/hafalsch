@@ -2,6 +2,7 @@ package dev.schlaubi.hafalsch.bot.database
 
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
+import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
 import dev.schlaubi.mikbot.plugin.api.io.getCollection
 import dev.schlaubi.mikbot.plugin.api.util.database
 import kotlinx.datetime.Instant
@@ -14,7 +15,12 @@ import org.litote.kmongo.coroutine.CoroutineCollection
 object Database : KordExKoinComponent {
     val traewellingLogins = database.getCollection<TraevellingUserLogin>("traewelling_logins")
     val checkIns = database.getCollection<CheckIn>("train_check_ins")
+    val journeyStates = database.getCollection<JourneyState>("journey_states")
+    val subscriptionSettings = database.getCollection<SubscribtionSettings>("hafalsch_subscription_settings")
 }
+
+suspend fun CoroutineCollection<SubscribtionSettings>.findOneByIdSafe(user: Snowflake) =
+    findOneById(user) ?: SubscribtionSettings(user)
 
 suspend fun CoroutineCollection<CheckIn>.findForJourney(user: Snowflake, journeyId: String) = findOne(
     and(CheckIn::journeyId eq journeyId, CheckIn::user eq user)
@@ -42,3 +48,46 @@ data class CheckIn(
     val start: String,
     val end: String
 )
+
+@Serializable
+data class JourneyIdentifier(val trainName: String, val initialDeparture: Instant)
+
+@Serializable
+data class JourneyState(
+    @SerialName("_id")
+    val journeyId: String,
+    val messages: List<IrisMessage>,
+    val delays: Map<String, Int> // Map<EVA, DELAY>
+) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is JourneyState) return false
+
+        if (other.journeyId != journeyId) return false
+        if (other.delays != delays) return false
+
+        return messages.withIndex()
+            .all { (index, message) ->
+                val previousMessage = other.messages.getOrNull(index)
+
+                previousMessage?.value == message.value && message.superseded == previousMessage?.superseded
+            }
+    }
+
+    override fun hashCode(): Int {
+        var result = journeyId.hashCode()
+        result = 31 * result + messages.hashCode()
+        result = 31 * result + delays.hashCode()
+        return result
+    }
+}
+
+@Serializable
+data class SubscribtionSettings(
+    @SerialName("_id")
+    val id: Snowflake,
+    val currentDelayMargin: Int = 5, // change-margin for delay at current stop
+    val exitDelayMargin: Int = 5, // change-margin for delay at users exit stop
+    val subscribeToMessages: Boolean = true,
+    val locale: String? = null
+)
+

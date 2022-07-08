@@ -5,6 +5,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.schlaubi.hafalsch.bot.commands.departuresCommand
 import dev.schlaubi.hafalsch.bot.commands.journeyCommand
+import dev.schlaubi.hafalsch.bot.commands.notificationSettingsCommand
 import dev.schlaubi.hafalsch.bot.commands.stationCommand
 import dev.schlaubi.hafalsch.bot.commands.traewelling.traewellingCommand
 import dev.schlaubi.hafalsch.bot.config.Config
@@ -19,6 +20,7 @@ import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.cancel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -30,6 +32,7 @@ private data class TraewellingError(val error: String)
 @PluginMain
 class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
     private val traewellingSynchronizer = TraewellingCheckInSynchronizer()
+    private val notificationExecutor = NotificationExecutor()
     private val marudor = Marudor()
     private val traewelling = Traewelling {
         url(Config.TRÄWELLING_API)
@@ -71,6 +74,11 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
     }
 
+    override fun stop() {
+        traewellingSynchronizer.cancel()
+        notificationExecutor.cancel()
+    }
+
     override fun ExtensibleBotBuilder.ExtensionsBuilder.addExtensions() {
         add(::HafalschModule)
     }
@@ -78,12 +86,13 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
 class HafalschModule : Extension() {
     override val name: String = "Hafalsch"
-    override val bundle: String = "hafalsch"
+    override val bundle: String = dev.schlaubi.hafalsch.bot.util.bundle
 
     override suspend fun setup() {
         stationCommand()
         journeyCommand()
         departuresCommand()
+        notificationSettingsCommand()
         traewellingCommand()
     }
 }

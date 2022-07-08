@@ -12,10 +12,14 @@ import dev.kord.common.annotation.KordExperimental
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.rest.builder.message.create.embed
 import dev.schlaubi.hafalsch.bot.command.traeewelling.*
+import dev.schlaubi.hafalsch.bot.core.saveState
 import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
 import dev.schlaubi.hafalsch.bot.database.findForJourney
+import dev.schlaubi.hafalsch.bot.ui.filterRelevant
+import dev.schlaubi.hafalsch.bot.ui.format
+import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.hafalsch.traewelling.entity.CheckInRequest
 import dev.schlaubi.hafalsch.traewelling.entity.User
@@ -99,6 +103,7 @@ context(Extension)
     description = "commands.check_in.description"
 
     val traewelling by inject<Traewelling>()
+    val marudor by inject<Marudor>()
 
     action {
         val request = CheckInRequest(
@@ -114,22 +119,40 @@ context(Extension)
             val checkIn = traewelling.trains.checkIn(request, token)
 
             respond {
+                val dbCheckIn = CheckIn(
+                    user = user.id,
+                    journeyId = arguments.trip.jid,
+                    start = arguments.trip.station,
+                    end = arguments.exit
+                )
                 if (Database.checkIns.findForJourney(user.id, arguments.trip.jid) == null) {
-                    val dbCheckIn = CheckIn(
-                        user = user.id,
-                        journeyId = arguments.trip.jid,
-                        start = arguments.trip.station,
-                        end = arguments.exit
-                    )
 
                     Database.checkIns.save(dbCheckIn)
                 }
+                val state = dbCheckIn.saveState(marudor)
                 embed {
                     title = translate("commands.traewelling.check-in.success.title")
                     description = translate(
                         "commands.traewelling.check-in.success.description",
                         arrayOf(arguments.trip.lineName, checkIn.distance, checkIn.points)
                     )
+
+                    field {
+                        this.name = translate("commands.traewelling.check-in.delay.title")
+
+                        val currentDelay = state.delays[arguments.trip.station]
+                        val delayAtExit = state.delays[arguments.exit]
+
+                        value = translate("commands.traewelling.check-in.delay.description", arrayOf(currentDelay, delayAtExit))
+                    }
+
+                    val relevantMessages = state.messages.filterRelevant()
+                    if (relevantMessages.isNotEmpty()) {
+                        field {
+                            this.name = translate("commands.traewelling.check-in.messages.title")
+                            value = state.messages.format()
+                        }
+                    }
 
                     if (checkIn.alsoOnThisConnection.isNotEmpty()) {
                         field {

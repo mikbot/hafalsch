@@ -1,42 +1,31 @@
 package dev.schlaubi.hafalsch.bot.core
 
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
 import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
 import dev.schlaubi.hafalsch.bot.database.findForJournies
+import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.hafalsch.traewelling.entity.Status
 import dev.schlaubi.stdx.coroutines.parallelMap
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ticker
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.litote.kmongo.gte
-import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 private val LOG = KotlinLogging.logger { }
 
-class TraewellingCheckInSynchronizer : CoroutineScope, KordExKoinComponent {
+class TraewellingCheckInSynchronizer : RepeatingTask() {
 
-    @OptIn(ObsoleteCoroutinesApi::class)
-    private val ticker = ticker(1.minutes.inWholeMilliseconds, 0)
-    private lateinit var runner: Job
-    override val coroutineContext: CoroutineContext = Dispatchers.IO + SupervisorJob()
+    override val duration: Duration = 1.minutes
     private val traewelling by inject<Traewelling>()
+    private val marudor by inject<Marudor>()
 
-    fun start() {
-        runner = launch {
-            for (unit in ticker) {
-                syncTraewelling()
-            }
-        }
-    }
-
-    private suspend fun syncTraewelling() {
+    override suspend fun run() {
         LOG.debug { "Importing Träwelling check ins" }
         val checkIns = Database.traewellingLogins.find(TraevellingUserLogin::expiresAt gte Clock.System.now())
             .toList()
@@ -73,8 +62,15 @@ class TraewellingCheckInSynchronizer : CoroutineScope, KordExKoinComponent {
             )
         }
 
-        if (dbCheckIns.isNotEmpty()) {
-            Database.checkIns.insertMany(dbCheckIns)
+        coroutineScope {
+            dbCheckIns.forEach {
+                launch {
+                    it.saveState(marudor)
+                }
+            }
+            if (dbCheckIns.isNotEmpty()) {
+                Database.checkIns.insertMany(dbCheckIns)
+            }
         }
     }
 }
