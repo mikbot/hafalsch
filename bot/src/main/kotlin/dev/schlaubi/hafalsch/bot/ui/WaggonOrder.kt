@@ -5,6 +5,7 @@ import dev.schlaubi.hafalsch.bot.util.fetchCoachSequence
 import dev.schlaubi.hafalsch.marudor.entity.CoachSequence
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
 import dev.schlaubi.hafalsch.marudor.entity.Stop
+import dev.schlaubi.stdx.core.isNotNullOrBlank
 
 @Suppress("ConvertLambdaToReference")
 suspend fun UIContext.sendWaggonOrder(
@@ -18,14 +19,16 @@ suspend fun UIContext.sendWaggonOrder(
     pageBuilder {
         doFollowUp = true
 
-        coachSequence.sequence.groups.forEach { (coaches, groupName, _, destinationName, trainName, _, model) ->
-            coaches.forEach { (_, category, closed, uic, type, identificationNumber, _, features, seats) ->
+        coachSequence.sequence.groups.forEach { group ->
+            val (coaches, groupName, _, destinationName, trainName, _, model) = group
+            coaches.forEach { coach ->
+                val (_, category, closed, uic, type, identificationNumber, _, features, seats) = coach
                 parent.page {
                     val rawTitle = translate("coach_sequence.title", identificationNumber)
-                    title = if (closed) {
-                        translate("journey.wannabe", rawTitle)
-                    } else {
-                        rawTitle
+                    title = when {
+                        identificationNumber == null -> translate("coach_sequence.unknown_coach")
+                        closed -> translate("journey.wannabe", rawTitle)
+                        else -> rawTitle
                     }
 
                     description = features.buildEmojiString()
@@ -60,13 +63,17 @@ suspend fun UIContext.sendWaggonOrder(
 
                     field {
                         name = translate("coach_sequence.jibberish")
-                        val explainer = "https://lib.finalrewind.org/dbdb/db_wagen/${uic?.substring(4, 9)}.png"
-                        val typeText = if ("WAGEN" in category) {
+                        val explainer = coach.findPlan(coachSequence.product.type, group)
+                        val typeText = if (explainer != null) {
                             "[$type]($explainer)"
                         } else {
                             type
                         }
-                        value = "$category aka $typeText"
+                        value = if (typeText.isNotNullOrBlank()) {
+                            "$category aka $typeText"
+                        } else {
+                            category
+                        }
                     }
 
                     if (seats?.comfort != null) {
