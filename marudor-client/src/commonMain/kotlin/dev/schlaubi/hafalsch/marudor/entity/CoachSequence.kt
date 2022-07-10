@@ -42,7 +42,7 @@ public data class CoachGroup(
     val trainName: String? = null,
     val number: String,
     @SerialName("baureihe")
-    val model: Model
+    val model: Model? = null
 ) {
     @Serializable
     public data class Model(val name: String, @SerialName("baureihe") val model: String? = null, val identifier: String)

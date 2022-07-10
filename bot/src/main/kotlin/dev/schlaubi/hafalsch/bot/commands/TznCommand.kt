@@ -8,6 +8,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import dev.schlaubi.hafalsch.bot.ui.findSpecialTrainEmote
 import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.bot.util.journeyAutoComplete
@@ -16,6 +17,7 @@ import dev.schlaubi.hafalsch.marudor.entity.CoachSequence
 import dev.schlaubi.hafalsch.rainbow_ice.RainbowICE
 import dev.schlaubi.hafalsch.rainbow_ice.entity.TrainVehicle
 import dev.schlaubi.mikbot.plugin.api.util.discordError
+import dev.schlaubi.stdx.core.isNotNullOrBlank
 import kotlinx.datetime.Instant
 import org.koin.core.component.inject
 import kotlin.math.max
@@ -91,17 +93,23 @@ context(Extension)
     val type = coachSequence.product.type
 
     val embeds = buildList {
-        coachSequence.sequence.groups.forEach { (coaches, name, _, _, _, number) ->
+        coachSequence.sequence.groups.forEach { group ->
+            val (coaches, name, _, _, _, number, model) = group
             embed {
-                val a = coaches.first { it.identificationNumber.isNotBlank() }.identificationNumber.toInt()
-                val b = coaches.last { it.identificationNumber.isNotBlank() }.identificationNumber.toInt()
-                val begin = min(a, b)
-                val end = max(a, b)
+                val a = coaches.firstOrNull { it.identificationNumber.isNotBlank() }?.identificationNumber?.toInt()
+                val b = coaches.lastOrNull { it.identificationNumber.isNotBlank() }?.identificationNumber?.toInt()
+                title = if (a == null || b == null) {
+                    translate("commands.tzn.info.title.unknown")
+                } else {
+                    val begin = min(a, b)
+                    val end = max(a, b)
 
-                title = translate(
-                    "commands.tzn.info.title",
-                    arrayOf(begin, end)
-                )
+                    translate(
+                        "commands.tzn.info.title",
+                        arrayOf(begin, end)
+                    )
+                }
+
 
                 val probableTzn = name.replace(type, "").trim().trim('0')
                 val tznExists = rainbowICE.matchTrain(probableTzn)
@@ -118,6 +126,20 @@ context(Extension)
                         arrayOf(probableTzn, tznJourney?.trips?.firstOrNull()?.name)
                     )
                     else -> translate("commands.tzn.definitely", arrayOf(probableTzn))
+                }
+
+                if (model != null) {
+                    field {
+                        this.name = translate("commands.tzn.model.title")
+                        value = model.name
+                    }
+                }
+                val specialTrainEmote = group.findSpecialTrainEmote()
+                if (specialTrainEmote.isNotNullOrBlank()) {
+                    field {
+                        this.name = translate("journey.is_best_train")
+                        value = specialTrainEmote!!
+                    }
                 }
             }
         }

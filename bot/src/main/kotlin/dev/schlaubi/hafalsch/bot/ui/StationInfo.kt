@@ -2,15 +2,12 @@ package dev.schlaubi.hafalsch.bot.ui
 
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import dev.kord.x.emoji.DiscordEmoji
 import dev.kord.x.emoji.Emojis
 import dev.schlaubi.hafalsch.bot.core.*
 import dev.schlaubi.hafalsch.bot.paginator.MultiButtonPaginatorBuilder
 import dev.schlaubi.hafalsch.bot.util.fetchCoachSequence
 import dev.schlaubi.hafalsch.marudor.Marudor
-import dev.schlaubi.hafalsch.marudor.entity.HafasMessage
-import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
-import dev.schlaubi.hafalsch.marudor.entity.Stop
+import dev.schlaubi.hafalsch.marudor.entity.*
 import dev.schlaubi.stdx.core.isNotNullOrEmpty
 
 
@@ -100,23 +97,27 @@ suspend fun Marudor.findSpecialTrainEmote(journey: JourneyInformation): String? 
     val stop = journey.stops.firstOrNull { it.departure?.hasWaggonOrder == true }
         ?: return null
     val order = journey.fetchCoachSequence(stop) ?: return null
-    return order.sequence.groups
+    return order.findSpecialTrainEmote()
+}
+
+fun CoachSequence.findSpecialTrainEmote(): String {
+    return sequence.groups
         .asSequence()
-        .mapNotNull {
-            it.name.substringAfter("ICE").toIntOrNull()
-        }
-        .mapNotNull {
-            when (it) {
-                rainbowICE -> Emojis.rainbow
-                europeICE -> Emojis.flagEu
-                germanyICE -> Emojis.flagDe
-                maskICE -> Emojis.mask
-                femaleICE -> Emojis.womanOfficeWorker
-                else -> null
-            }
-        }
-        .map(DiscordEmoji::unicode)
+        .mapNotNull(CoachGroup::findSpecialTrainEmote)
         .joinToString("")
+}
+
+fun CoachGroup.findSpecialTrainEmote(): String? {
+    val tzn = name.substringAfter("ICE").toIntOrNull() ?: return null
+    val emoji = when (tzn) {
+        rainbowICE -> Emojis.rainbow
+        europeICE -> Emojis.flagEu
+        germanyICE -> Emojis.flagDe
+        maskICE -> Emojis.mask
+        femaleICE -> Emojis.womanOfficeWorker
+        else -> return null
+    }
+    return emoji.unicode
 }
 
 fun Stop.Date?.render(): String {

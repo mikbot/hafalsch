@@ -116,9 +116,9 @@ public class Marudor(public val resoures: ClientResources) {
             departure: Instant,
             eva: String? = null,
             initialDeparture: Instant? = null
-        ): CoachSequenceEntity =
+        ): CoachSequenceEntity? =
             resoures.client.get(CoachSequenceRoute.V4.CoachSequence(trainNumber, departure, eva, initialDeparture))
-                .body()
+                .safeBody()
     }
 
     public inner class Iris {

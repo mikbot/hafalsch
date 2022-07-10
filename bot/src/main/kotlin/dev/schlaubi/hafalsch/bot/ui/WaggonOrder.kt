@@ -51,9 +51,11 @@ suspend fun UIContext.sendWaggonOrder(
                         }
                     }
 
-                    field {
-                        name = translate("coach_sequence.model")
-                        value = model.name
+                    if (model != null) {
+                        field {
+                            name = translate("coach_sequence.model")
+                            value = model.name
+                        }
                     }
 
                     field {
