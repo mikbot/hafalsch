@@ -22,6 +22,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.minutes
 
 
 @Serializable
@@ -56,6 +57,11 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
                     discordError(message)
                 }
+            }
+
+            install(HttpTimeout) {
+                // Träwelling requests can take long
+                requestTimeoutMillis = 1.minutes.inWholeMilliseconds
             }
         }
     }
