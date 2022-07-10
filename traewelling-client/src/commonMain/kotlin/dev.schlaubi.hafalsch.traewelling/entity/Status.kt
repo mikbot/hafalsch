@@ -71,7 +71,7 @@ public data class Event(
     val host: String,
     val url: String,
     @SerialName("train_station")
-    val trainStation: String,
+    val trainStation: String? = null,
     val begin: Instant,
     val end: Instant
 )
