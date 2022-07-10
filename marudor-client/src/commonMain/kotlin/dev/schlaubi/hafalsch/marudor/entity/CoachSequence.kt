@@ -56,7 +56,7 @@ public data class Coach(
     val closed: Boolean = false,
     val uic: String? = null,
     val type: String? = null,
-    val identificationNumber: String,
+    val identificationNumber: String? = null,
     val position: RelativePosition,
     val features: Features,
     val seats: Seats? = null

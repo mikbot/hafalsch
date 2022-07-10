@@ -96,8 +96,8 @@ context(Extension)
         coachSequence.sequence.groups.forEach { group ->
             val (coaches, name, _, _, _, number, model) = group
             embed {
-                val a = coaches.firstOrNull { it.identificationNumber.isNotBlank() }?.identificationNumber?.toInt()
-                val b = coaches.lastOrNull { it.identificationNumber.isNotBlank() }?.identificationNumber?.toInt()
+                val a = coaches.firstOrNull { it.identificationNumber.isNotNullOrBlank() }?.identificationNumber?.toInt()
+                val b = coaches.lastOrNull { it.identificationNumber.isNotNullOrBlank() }?.identificationNumber?.toInt()
                 title = if (a == null || b == null) {
                     translate("commands.tzn.info.title.unknown")
                 } else {
