@@ -28,7 +28,10 @@ private val format = DateTimeFormatter.ofPattern("HH:mm")
 @Converter(
     "trip",
 
-    types = [ConverterType.SINGLE]
+    types = [ConverterType.SINGLE],
+    builderBuildFunctionStatements = [
+        "autoComplete { with(converter) { onAutoComplete() } }"
+    ]
 )
 class TripConverter(validator: Validator<JourneyInfo> = null) : AutoCompletingArgument<JourneyInfo>(validator) {
     private val traewelling by inject<Traewelling>()
@@ -54,7 +57,7 @@ class TripConverter(validator: Validator<JourneyInfo> = null) : AutoCompletingAr
         return true
     }
 
-    override suspend fun AutoCompleteInteraction.onAutoComplete() {
+    suspend fun AutoCompleteInteraction.onAutoComplete() {
         val stationRaw = command.options[TraewellingStationConverter.name]?.value?.toString()
         withToken {
             val ibnr = stationRaw?.safeIbnr(token)

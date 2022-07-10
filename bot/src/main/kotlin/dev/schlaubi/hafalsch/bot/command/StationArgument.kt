@@ -16,7 +16,10 @@ import org.koin.core.component.inject
 @Converter(
     "station",
 
-    types = [ConverterType.SINGLE, ConverterType.OPTIONAL]
+    types = [ConverterType.SINGLE, ConverterType.OPTIONAL],
+    builderBuildFunctionStatements = [
+        "autoComplete { with(converter) { onAutoComplete() } }"
+    ]
 )
 class StationConverter(validator: Validator<Station> = null) : AutoCompletingArgument<Station>(validator) {
     val marudor by inject<Marudor>()
@@ -38,7 +41,7 @@ class StationConverter(validator: Validator<Station> = null) : AutoCompletingArg
         return true
     }
 
-    override suspend fun AutoCompleteInteraction.onAutoComplete() {
+    suspend fun AutoCompleteInteraction.onAutoComplete() {
         val safeInput = focusedOption.safeInput
 
         if (safeInput.isEmpty()) {

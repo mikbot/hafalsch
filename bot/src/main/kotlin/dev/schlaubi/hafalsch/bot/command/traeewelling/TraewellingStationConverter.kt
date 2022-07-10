@@ -19,7 +19,10 @@ import org.koin.core.component.inject
 @Converter(
     "traewellingStation",
 
-    types = [ConverterType.SINGLE]
+    types = [ConverterType.SINGLE],
+    builderBuildFunctionStatements = [
+        "autoComplete { with(converter) { onAutoComplete() } }"
+    ]
 )
 class TraewellingStationConverter(validator: Validator<Int> = null) : AutoCompletingArgument<Int>(validator) {
     private val traewelling by inject<Traewelling>()
@@ -39,7 +42,7 @@ class TraewellingStationConverter(validator: Validator<Int> = null) : AutoComple
         return true
     }
 
-    override suspend fun AutoCompleteInteraction.onAutoComplete() {
+    suspend fun AutoCompleteInteraction.onAutoComplete() {
         withToken {
             val safeInput = focusedOption.safeInput
 

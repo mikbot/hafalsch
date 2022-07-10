@@ -19,7 +19,10 @@ import org.koin.core.component.inject
 @Converter(
     "exit",
 
-    types = [ConverterType.SINGLE]
+    types = [ConverterType.SINGLE],
+    builderBuildFunctionStatements = [
+        "autoComplete { with(converter) { onAutoComplete() } }"
+    ]
 )
 class ExitConverter(validator: Validator<String> = null) : AutoCompletingArgument<String>(validator) {
     private val traewelling by inject<Traewelling>()
@@ -53,7 +56,7 @@ class ExitConverter(validator: Validator<String> = null) : AutoCompletingArgumen
         return true
     }
 
-    override suspend fun AutoCompleteInteraction.onAutoComplete() {
+    suspend fun AutoCompleteInteraction.onAutoComplete() {
         val stationRaw = command.options[TraewellingStationConverter.name]?.value?.toString()
         val tripRaw = command.options[TripConverter.name]?.value?.toString()
         withToken {
