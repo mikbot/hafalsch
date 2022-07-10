@@ -11,12 +11,11 @@ import dev.kord.core.behavior.channel.createMessage
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.schlaubi.hafalsch.bot.database.*
 import dev.schlaubi.hafalsch.bot.ui.*
+import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
+import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
 import dev.schlaubi.mikbot.plugin.api.util.discordError
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -29,7 +28,6 @@ import java.awt.Color
 import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
-import dev.schlaubi.mikbot.plugin.api.util.embed as makeEmbed
 
 private val LOG = KotlinLogging.logger { }
 
@@ -89,8 +87,6 @@ class NotificationExecutor : RepeatingTask() {
     }
 }
 
-
-private inline fun MutableList<EmbedBuilder>.embed(block: EmbedBuilder.() -> Unit) = add(makeEmbed(block))
 private fun delayDifference(current: Int, before: Int?) = abs(current - (before ?: 0))
 
 suspend fun CheckIn.saveState(marudor: Marudor): JourneyState {
@@ -209,21 +205,6 @@ private suspend fun UIContext.sendStatus(
                 }
             }
         }
-    }
-}
-
-private suspend fun Marudor.detailsByJourneyId(journeyId: String): JourneyInformation? {
-    val redirect = hafas.detailsRedirect(journeyId)
-    val response = resoures.client.get(redirect)
-    return if (response.status.isSuccess()) {
-        val url = response.request.url
-        //                    drop(1)/{trainName}/departure
-        // https://marudor.de/details/ICE%20517/2022-07-08T05:29:00.000Z
-        val (trainName, departureRaw) = url.pathSegments.drop(2)
-        val departure = Instant.parse(departureRaw)
-        hafas.details(trainName, date = departure)
-    } else {
-        null
     }
 }
 

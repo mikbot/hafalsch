@@ -5,43 +5,20 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
-import dev.kord.core.behavior.interaction.suggestString
 import dev.schlaubi.hafalsch.bot.command.optionalDate
 import dev.schlaubi.hafalsch.bot.command.optionalStation
 import dev.schlaubi.hafalsch.bot.command.profile
 import dev.schlaubi.hafalsch.bot.ui.JourneySource
 import dev.schlaubi.hafalsch.bot.ui.asUIContext
 import dev.schlaubi.hafalsch.bot.ui.journey
-import dev.schlaubi.hafalsch.marudor.Marudor
-import dev.schlaubi.mikbot.plugin.api.util.safeInput
-import kotlinx.coroutines.coroutineScope
-import org.koin.core.component.inject
+import dev.schlaubi.hafalsch.bot.util.journeyAutoComplete
 
 class JourneyArguments : Arguments(), KordExKoinComponent, JourneySource {
-    private val marudor by inject<Marudor>()
-
     override val name by string {
         name = "name"
         description = "commands.journey.arguments.name.description"
 
-        autoComplete {
-            val input = focusedOption.safeInput
-
-            coroutineScope {
-                val matches =
-                    runCatching { marudor.hafas.journeyMatch(input.substringBefore(' ')) }.getOrElse { emptyList() }
-                val results = matches.sortedBy {
-                    it.train.name.withIndex().count { (index, value) -> input.getOrNull(index) == value }
-                }
-
-                suggestString {
-                    results.take(25).forEach {
-                        choice("${it.train.name} -> ${it.lastStop.station.title}", it.train.name)
-                    }
-                }
-            }
-
-        }
+        journeyAutoComplete()
     }
 
     override val station by optionalStation {

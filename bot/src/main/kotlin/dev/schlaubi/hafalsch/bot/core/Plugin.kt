@@ -3,14 +3,12 @@ package dev.schlaubi.hafalsch.bot.core
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.loadModule
-import dev.schlaubi.hafalsch.bot.commands.departuresCommand
-import dev.schlaubi.hafalsch.bot.commands.journeyCommand
-import dev.schlaubi.hafalsch.bot.commands.notificationSettingsCommand
-import dev.schlaubi.hafalsch.bot.commands.stationCommand
+import dev.schlaubi.hafalsch.bot.commands.*
 import dev.schlaubi.hafalsch.bot.commands.traewelling.traewellingCommand
 import dev.schlaubi.hafalsch.bot.config.Config
 import dev.schlaubi.hafalsch.client.invoke
 import dev.schlaubi.hafalsch.marudor.Marudor
+import dev.schlaubi.hafalsch.rainbow_ice.RainbowICE
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.mikbot.plugin.api.Plugin
 import dev.schlaubi.mikbot.plugin.api.PluginMain
@@ -34,6 +32,7 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
     private val traewellingSynchronizer = TraewellingCheckInSynchronizer()
     private val notificationExecutor = NotificationExecutor()
     private val marudor = Marudor()
+    private val rainbowICE = RainbowICE()
     private val traewelling = Traewelling {
         url(Config.TRÄWELLING_API)
         httpClient = HttpClient {
@@ -67,6 +66,7 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
                 loadModule {
                     single { marudor }
                     single { traewelling }
+                    single { rainbowICE }
                 }
 
                 traewellingSynchronizer.start()
@@ -93,6 +93,7 @@ class HafalschModule : Extension() {
         journeyCommand()
         departuresCommand()
         notificationSettingsCommand()
+        tznCommand()
         traewellingCommand()
     }
 }
