@@ -1,25 +1,26 @@
 package dev.schlaubi.hafalsch.bot.commands
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingInt
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
+import com.kotlindiscord.kord.extensions.components.components
+import com.kotlindiscord.kord.extensions.components.publicButton
 import com.kotlindiscord.kord.extensions.components.types.emoji
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.x.emoji.Emojis
 import dev.schlaubi.hafalsch.bot.command.station
 import dev.schlaubi.hafalsch.bot.paginator.multiButtonPaginator
 import dev.schlaubi.hafalsch.bot.ui.*
-import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.Departure
+import dev.schlaubi.hafalsch.marudor.entity.Station
 import dev.schlaubi.hafalsch.marudor.entity.isNullOrEmpty
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import org.koin.core.component.inject
 
 
 private val numbers = listOf(Emojis.one, Emojis.two, Emojis.three, Emojis.four, Emojis.five)
@@ -46,94 +47,123 @@ class DeparturesArguments : Arguments() {
         minValue = 0
         maxValue = 480
     }
+
+    val includeRegional by defaultingBoolean {
+        name = "include-regional"
+        description = "commands.departures.arguments.include_regional.description"
+
+        defaultValue = false
+    }
 }
 
 suspend fun Extension.departuresCommand() = publicSlashCommand(::DeparturesArguments) {
     name = "commands.departures.name"
     description = "commands.departures.description"
 
-    val marudor by inject<Marudor>()
-
     action {
-        val departures = marudor.iris.departures(arguments.station.eva, arguments.lookahead, arguments.lookbehind)
-
-        if (departures.isNullOrEmpty()) {
-            respond {
-                content = translate("commands.departures.empty")
-            }
-            return@action
+        asUIContext {
+            departures(arguments.station, arguments.lookahead, arguments.lookbehind, arguments.includeRegional)
         }
+    }
+}
 
-        val orderedDepartures = departures!!.allDepartures.chunked(5).map {
-            val item = it.firstOrNull()
-            val departureTime = (item?.departure?.actualTime ?: item?.arrival?.actualTime) ?: Instant.DISTANT_PAST
+private suspend fun UIContext.departures(station: Station, lookahead: Int?, lookbehind: Int, includeRegional: Boolean) {
+    val departures = if (includeRegional) {
+        marudor.hafas.departures(station.eva, lookahead, lookbehind)
+    } else {
+        marudor.iris.departures(station.eva, lookahead, lookbehind)
+    }
 
-            departureTime to it
-        }
-        val now = Clock.System.now()
-        val selectedIndex = orderedDepartures.indexOfFirst { (firstDeparture) -> firstDeparture > now }
+    if (departures.isNullOrEmpty()) {
+        respond {
+            content = translate("commands.departures.empty")
+            if (!includeRegional) {
+                components {
+                    publicButton {
+                        bundle = dev.schlaubi.hafalsch.bot.util.bundle
+                        label = translate("departures.include_regional")
 
-        multiButtonPaginator {
-            orderedDepartures.forEach { (_, currentDepartures) ->
-                parent.page {
-                    title = translate("departures.title", arrayOf(arguments.station.name.replaceStationNames()))
-
-                    description = currentDepartures.joinToString("\n") { departure ->
-                        val via = departure.route.asSequence().filter(Departure.Stop::showVia)
-                            .joinToString(",") { (additional, cancelled, _, name1) ->
-                                name1.cancel(cancelled).bold(additional).replaceStationNames()
+                        action {
+                            asUIContext {
+                                departures(station, lookahead, lookbehind, true)
                             }
-
-                        val text = buildString {
-                            if (departure.departure == null) {
-                                append(departure.arrival!!.render()).append(' ')
-                            } else {
-                                append(departure.departure!!.render()).append(' ')
-                            }
-
-                            val name = if (departure.cancelled) {
-                                runBlocking { translate("journey.wannabe", arrayOf(departure.train.name)) }
-                            } else {
-                                departure.train.name
-                            }
-
-                            append(name).append(": **").append(departure.destination.replaceStationNames())
-                                .append("**")
-                            if (via.isNotBlank()) {
-                                append(" (").append(via).append(")")
-                            }
-                        }
-
-                        text
-                    }
-                }
-            }
-
-            val allButLast = 0 until orderedDepartures.lastIndex
-            numbers.forEachIndexed { index, (unicode) ->
-                val pages = if (orderedDepartures.last().second.lastIndex < index) {
-                    allButLast.toList()
-                } else {
-                    null
-                }
-                publicButton(2, pages) {
-                    emoji(unicode)
-
-                    action {
-                        val journey = orderedDepartures[it.currentPageNum].second[index]
-
-                        asUIContext {
-                            journey(JourneyData(journey.train.name, arguments.station, null, null), true)
                         }
                     }
                 }
             }
-        }.apply {
-            currentPageNum = selectedIndex
-            currentPage = pages.get(currentGroup, currentPageNum)
-
-            send()
         }
+        return
+    }
+
+    val orderedDepartures = departures!!.allDepartures.chunked(5).map {
+        val item = it.firstOrNull()
+        val departureTime = (item?.departure?.actualTime ?: item?.arrival?.actualTime) ?: Instant.DISTANT_PAST
+
+        departureTime to it
+    }
+    val now = Clock.System.now()
+    val selectedIndex = orderedDepartures.indexOfFirst { (firstDeparture) -> firstDeparture > now }
+
+    multiButtonPaginator {
+        orderedDepartures.forEach { (_, currentDepartures) ->
+            parent.page {
+                title = translate("departures.title", station.name.replaceStationNames())
+
+                description = currentDepartures.joinToString("\n") { departure ->
+                    val via = departure.route.asSequence().filter(Departure.Stop::showVia)
+                        .joinToString(",") { (additional, cancelled, _, name1) ->
+                            name1.cancel(cancelled).bold(additional).replaceStationNames()
+                        }
+
+                    val text = buildString {
+                        if (departure.departure == null) {
+                            append(departure.arrival!!.render()).append(' ')
+                        } else {
+                            append(departure.departure!!.render()).append(' ')
+                        }
+
+                        val name = if (departure.cancelled) {
+                            runBlocking { translate("journey.wannabe", arrayOf(departure.train.name)) }
+                        } else {
+                            departure.train.name
+                        }
+
+                        append(name).append(": **").append(departure.destination.replaceStationNames())
+                            .append("**")
+                        if (via.isNotBlank()) {
+                            append(" (").append(via).append(")")
+                        }
+                    }
+
+                    text
+                }
+            }
+        }
+
+        val allButLast = 0 until orderedDepartures.lastIndex
+        numbers.forEachIndexed { index, (unicode) ->
+            val pages = if (orderedDepartures.last().second.lastIndex < index) {
+                allButLast.toList()
+            } else {
+                null
+            }
+            publicButton(2, pages) {
+                emoji(unicode)
+
+                action {
+                    val journey = orderedDepartures[it.currentPageNum].second[index]
+
+                    asUIContext {
+                        journey(JourneyData(journey.train.name, station, null, null), true)
+                    }
+                }
+            }
+        }
+    }.apply {
+        currentPageNum = selectedIndex
+        currentPage = pages.get(currentGroup, currentPageNum)
+
+        send()
     }
 }
 

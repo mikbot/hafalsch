@@ -6,6 +6,8 @@ import com.kotlindiscord.kord.extensions.components.buttons.PublicInteractionBut
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.core.Kord
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
+import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.mikbot.plugin.api.pluginSystem
 import dev.schlaubi.mikbot.plugin.api.util.kord
@@ -20,6 +22,9 @@ interface UIContext : KordExKoinComponent {
 
     suspend fun translate(key: String, vararg arguments: Any?): String
 }
+
+suspend inline fun UIContext.respond(builder: MessageCreateBuilder.() -> Unit) =
+    response.createEphemeralFollowup(builder)
 
 @PublishedApi
 internal class SlashCommandUIContext(private val slashCommandContext: PublicSlashCommandContext<*>) : UIContext {

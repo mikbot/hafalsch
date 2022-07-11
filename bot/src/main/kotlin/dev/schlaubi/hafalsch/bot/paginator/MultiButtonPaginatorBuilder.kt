@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.components.publicButton
 import com.kotlindiscord.kord.extensions.pagination.builders.PaginatorBuilder
 import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
+import dev.schlaubi.hafalsch.bot.ui.UIContext
 import java.util.*
 
 data class MultiButtonPaginatorBuilder(
@@ -55,6 +56,12 @@ inline fun PublicSlashCommandContext<*>.multiButtonPaginator(
     locale: Locale? = null,
     block: MultiButtonPaginatorBuilder.() -> Unit
 ) = multiButtonPaginator(interactionResponse, command.resolvedBundle, defaultGroup, locale, block)
+
+inline fun UIContext.multiButtonPaginator(
+    defaultGroup: String = "",
+    locale: Locale? = null,
+    block: MultiButtonPaginatorBuilder.() -> Unit
+) = multiButtonPaginator(response, bundle, defaultGroup, locale, block)
 
 inline fun multiButtonPaginator(
     interactionResponse: MessageInteractionResponseBehavior,

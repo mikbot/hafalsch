@@ -30,6 +30,16 @@ public class Marudor(public val resoures: ClientResources) {
 
     public inner class Hafas {
         /**
+         * Retrieves the departures for a specific [station][eva] (including non DB regional services).
+         */
+        public suspend fun departures(
+            eva: String,
+            lookahead: Int? = null,
+            lookbehind: Int? = null
+        ): IrisDepartures? =
+            resoures.client.get(HafasRoute.Experimental.IrisCompatibleAbfahrten(eva, lookahead, lookbehind)).safeBody()
+
+        /**
          * Retrieves [JourneyInformation] for specific [trainName].
          */
         public suspend fun details(

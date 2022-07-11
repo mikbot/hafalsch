@@ -47,7 +47,7 @@ public data class IrisDepartures(
     val departures: List<Departure>,
     val lookbehind: List<Departure>,
     val wings: CollectionMap<String, Departure>,
-    val strike: Int
+    val strike: Int = 0
 ) {
     val allDepartures: List<Departure>
         get() = lookbehind + departures

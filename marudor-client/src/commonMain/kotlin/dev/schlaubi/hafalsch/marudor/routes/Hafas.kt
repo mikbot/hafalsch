@@ -16,6 +16,19 @@ import kotlinx.serialization.encoding.Encoder
 @Resource("hafas")
 public class Hafas {
     @Serializable
+    @Resource("experimental")
+    public data class Experimental(val hafas: Hafas = Hafas()) {
+        @Serializable
+        @Resource("irisCompatibleAbfahrten/{eva}")
+        public data class IrisCompatibleAbfahrten(
+            val eva: String,
+            val lookahead: Int? = null,
+            val lookbehind: Int? = null,
+            val experimental: Experimental = Experimental()
+        )
+    }
+
+    @Serializable
     @Resource("v1")
     public data class V1(val hafas: Hafas = Hafas()) {
         @Serializable
