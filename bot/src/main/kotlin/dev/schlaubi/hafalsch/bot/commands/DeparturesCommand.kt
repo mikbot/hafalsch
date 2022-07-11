@@ -1,8 +1,8 @@
 package dev.schlaubi.hafalsch.bot.commands
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingInt
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.publicButton
@@ -17,6 +17,7 @@ import dev.schlaubi.hafalsch.bot.paginator.multiButtonPaginator
 import dev.schlaubi.hafalsch.bot.ui.*
 import dev.schlaubi.hafalsch.marudor.entity.Departure
 import dev.schlaubi.hafalsch.marudor.entity.Station
+import dev.schlaubi.hafalsch.marudor.entity.TransportType
 import dev.schlaubi.hafalsch.marudor.entity.isNullOrEmpty
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -48,21 +49,30 @@ class DeparturesArguments : Arguments() {
         maxValue = 480
     }
 
-    val includeRegional by defaultingBoolean {
+    val includeRegional by optionalBoolean {
         name = "include-regional"
         description = "commands.departures.arguments.include_regional.description"
-
-        defaultValue = false
     }
 }
+
+private val nonRegionalTypes = listOf(
+    TransportType.RegionalTrain,
+    TransportType.HighSpeedTrain,
+    TransportType.InterRegionalTrain,
+    TransportType.CityTrain,
+    TransportType.InterCityTrain
+)
+
+private fun List<TransportType>.isOnlyRegional() = nonRegionalTypes.all { it !in this }
 
 suspend fun Extension.departuresCommand() = publicSlashCommand(::DeparturesArguments) {
     name = "commands.departures.name"
     description = "commands.departures.description"
 
     action {
+        val includeRegional = arguments.includeRegional ?: arguments.station.availableTransports.isOnlyRegional()
         asUIContext {
-            departures(arguments.station, arguments.lookahead, arguments.lookbehind, arguments.includeRegional)
+            departures(arguments.station, arguments.lookahead, arguments.lookbehind, includeRegional)
         }
     }
 }
