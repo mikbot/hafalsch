@@ -121,8 +121,9 @@ private suspend fun UIContext.departures(station: Station, lookahead: Int?, look
 
                 description = currentDepartures.joinToString("\n") { departure ->
                     val via = departure.route.asSequence().filter(Departure.Stop::showVia)
-                        .joinToString(",") { (additional, cancelled, _, name1) ->
-                            name1.cancel(cancelled).bold(additional).replaceStationNames()
+                        .joinToString(", ") { (additional, cancelled, _, stationName) ->
+                            val formattedName = stationName.cancel(cancelled).bold(additional).replaceStationNames()
+                            "`$formattedName`'
                         }
 
                     val text = buildString {
