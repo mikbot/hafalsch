@@ -123,7 +123,7 @@ private suspend fun UIContext.departures(station: Station, lookahead: Int?, look
                     val via = departure.route.asSequence().filter(Departure.Stop::showVia)
                         .joinToString(", ") { (additional, cancelled, _, stationName) ->
                             val formattedName = stationName.cancel(cancelled).bold(additional).replaceStationNames()
-                            "`$formattedName`'
+                            "`$formattedName`"
                         }
 
                     val text = buildString {
