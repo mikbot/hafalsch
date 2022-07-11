@@ -50,7 +50,7 @@ fun Coach.findPlan(trainType: String, parent: CoachGroup): String? {
         currentUic != null
     ) {
         val type = buildString {
-            append(currentUic[4])
+            append(currentUic.substr(4, 5))
             if (identifier.endsWith('R')) {
                 append(".r")
             } else if (".S" in identifier) {
@@ -64,3 +64,5 @@ fun Coach.findPlan(trainType: String, parent: CoachGroup): String? {
 }
 
 private fun fullUrl(type: String) = "https://lib.finalrewind.org/dbdb/db_wagen/$type.png"
+
+private fun CharSequence.substr(start: Int, length: Int) = substring(start, start + length)

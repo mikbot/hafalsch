@@ -70,7 +70,7 @@ public class Marudor(public val resoures: ClientResources) {
             return resoures.client.post(HafasRoute.V2.JourneyMatch(profile)) {
                 contentType(ContentType.Application.Json)
                 setBody(HafasJourneyMatchRequest(name, initialDepartureDate, filters, onlyRT))
-            }.body()
+            }.safeBody() ?: emptyList()
         }
 
         /**
