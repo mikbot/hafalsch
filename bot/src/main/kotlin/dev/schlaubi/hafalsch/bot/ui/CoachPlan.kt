@@ -101,4 +101,5 @@ fun CoachGroup.Model.formatNameWithPlan(): String {
 
 private fun fullUrl(type: String) = "https://lib.finalrewind.org/dbdb/db_wagen/$type.png"
 
+// Worse implementation of substring, inspired by JS
 private fun CharSequence.substr(start: Int, length: Int) = substring(start, start + length)
