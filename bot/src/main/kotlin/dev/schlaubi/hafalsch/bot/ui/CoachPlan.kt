@@ -84,7 +84,7 @@ fun Coach.findPlan(trainType: String, parent: CoachGroup): String? {
 // Taken from: https://cs.github.com/marudor/BahnhofsAbfahrten/blob/31113ff2d669f208847dfa103ea6ed5e61bf2e12/packages/client/Common/Components/Reihung/BRInfo.tsx?q=WRSheets
 fun CoachGroup.Model.findPlan(): String? {
     return if (identifier in modelWithPdf) {
-        return "https://marudor.de//WRSheets/${identifier}.pdf"
+        return "https://marudor.de/WRSheets/${identifier}.pdf"
     } else {
         null
     }
