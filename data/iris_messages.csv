@@ -1,0 +1,103 @@
+RIS-Kundeninfotexte,,,
+Code,Typ,Langtext (alt),Langtext (neu)
+00,R,keine Verspätungsbegründung,keine Verspätungsbegründung
+01,R,----,nähere Informationen in Kürze
+02,R,Polizeiliche Ermittlung,Polizeieinsatz
+03,R,Feuerwehreinsatz an der Strecke,Feuerwehreinsatz auf der Strecke
+04,,,
+05,R,ärztliche Versorgung eines Fahrgastes,ärztliche Versorgung eines Fahrgastes
+06,R,Betätigen der Notbremse,unbefugtes Ziehen der Notbremse
+07,R,Personen im Gleis,unbefugte Personen auf der Strecke
+08,R,Notarzteinsatz am Gleis,Notarzteinsatz auf der Strecke
+09,R,Streikauswirkungen,Streikauswirkungen
+10,R,Tiere im Gleis,Tiere auf der Strecke
+11,R,Unwetter,Unwetter
+12,R,Warten auf ein verspätetes Schiff,Warten auf ein verspätetes Schiff
+13,R,Pass- und Zollkontrolle,Pass- und Zollkontrolle
+14,R,Technische Störung am Bahnhof,technischer Defekt am Bahnhof
+15,R,Beeinträchtigung durch Vandalismus,Beeinträchtigung durch Vandalismus
+16,R,Entschärfung einer Fliegerbombe,Entschärfung einer Fliegerbombe
+17,R,Beschädigung einer Brücke,Beschädigung einer Brücke
+18,R,umgestürzter Baum im Gleis,umgestürzter Baum auf der Strecke
+19,R,Unfall an einem Bahnübergang,Unfall an einem Bahnübergang
+20,,,
+21,R,Warten auf Fahrgäste aus einem anderen Zug,Warten auf Anschlussreisende
+22,R,Witterungsbedingte Störung,Witterungsbedingte Beeinträchtigungen
+23,,,
+24,R,Verspätung im Ausland,Verspätung im Ausland
+25,R,Warten auf weitere Wagen,Bereitstellung weiterer Wagen
+26,,,
+27,,,
+26,R,----,Abhängen von Wagen
+28,R,Gegenstände im Gleis,Gegenstände auf der Strecke
+29,R,Ersatzverkehr mit Bus ist eingerichtet,Ersatzverkehr mit Bus ist eingerichtet
+30,,,
+31,R,Bauarbeiten,Bauarbeiten
+32,R,Verzögerung beim Ein-/Ausstieg,Unterstützung beim Ein- und Ausstieg
+33,R,Oberleitungsstörung,Reparatur an der Oberleitung
+34,R,Signalstörung,Reparatur an einem Signal
+35,R,Streckensperrung  ,Streckensperrung
+36,R,technische Störung am Zug,Reparatur am Zug
+37,,,
+38,R,technische Störung an der Strecke,Reparatur an der Strecke
+39,,,
+40,R,Stellwerksstörung /-ausfall,defektes Stellwerk
+41,R,Störung an einem Bahnübergang,technischer Defekt an einem Bahnübergang
+42,R,außerplanmäßige Geschwindigkeitsbeschränkung,vorübergehend verminderte Geschwindigkeit auf der Strecke
+43,R,Verspätung eines vorausfahrenden Zuges,Verspätung eines vorausfahrenden Zuges
+44,R,Warten auf einen entgegenkommenden Zug,Warten auf einen entgegenkommenden Zug
+45,R,Überholung  ,Vorfahrt eines anderen Zuges
+46,R,Warten auf freie Einfahrt,Vorfahrt eines anderen Zuges
+47,R,verspätete Bereitstellung des Zuges,verspätete Bereitstellung des Zuges
+48,R,Verspätung aus vorheriger Fahrt,Verspätung aus vorheriger Fahrt
+49,R,----,kurzfristiger Personalausfall
+50,R,----,kurzfristige Erkrankung von Personal
+51,R,----,verspätetes Personal aus vorheriger Fahrt
+52,R,----,Streik
+53,R,----,Unwetterauswirkungen
+54,R,----,Verfügbarkeit der Gleise derzeit eingeschränkt
+55,R,technische Störung an einem anderen Zug,technischer Defekt an einem anderen Zug
+56,R,Warten auf Fahrgäste aus einem Bus,Warten auf Anschlussreisende
+57,R,Zusätzlicher Halt zum Ein-/Ausstieg für Reisende ,zusätzlicher Halt zum Ein- und Ausstieg
+58,R,Umleitung des Zuges,Umleitung des Zuges
+59,R,Schnee und Eis,Schnee und Eis
+60,R,Reduzierte Geschwindigkeit wegen Sturm,witterungsbedingt verminderte Geschwindigkeit
+61,R,Türstörung,defekte Tür
+62,R,behobene technische Störung am Zug,behobener technischer Defekt am Zug
+63,R,technische Untersuchung am Zug,technische Untersuchung am Zug
+64,R,Weichenstörung,Reparatur an der Weiche
+65,R,Erdrutsch,Erdrutsch
+66,R,Hochwasser,Hochwasser
+67,R,behördliche Anordnung,behördliche Maßnahme
+68,R,----,hohes Fahrgastaufkommen verlängert Ein- und Ausstieg
+69,R,----,Zug verkehrt mit verminderter Geschwindigkeit
+70,Q,WLAN im gesamten Zug nicht verfügbar,WLAN nicht verfügbar
+71,Q,WLAN in einem/mehreren Wagen nicht verfügbar,WLAN in einem/mehreren Wagen nicht verfügbar
+72,Q,Info-/Entertainment nicht verfügbar,Info-/Entertainment nicht verfügbar
+73,Q,Heute: Mehrzweckabteil vorne,Heute: Mehrzweckabteil vorne
+74,Q,Heute: Mehrzweckabteil hinten,Heute: Mehrzweckabteil hinten
+75,Q,Heute: 1. Klasse vorne,Heute: 1. Klasse vorne
+76,Q,Heute: 1. Klasse hinten,Heute: 1. Klasse hinten
+77,Q,ohne 1. Klasse,1. Klasse fehlt
+78,,,
+79,Q,ohne Mehrzweckabteil,Mehrzweckabteil fehlt
+80,Q,andere Reihenfolge der Wagen,andere Reihenfolge der Wagen
+81,,,
+82,Q,mehrere Wagen fehlen,mehrere Wagen fehlen
+83,Q,Störung fahrzeuggebundene Einstiegshilfe ,defekte fahrzeuggebundene Einstiegshilfe
+84,Q,Zug verkehrt richtig gereiht,Zug verkehrt richtig gereiht
+85,Q,ein Wagen fehlt,ein Wagen fehlt
+86,Q,gesamter Zug ohne Reservierung,gesamter Zug ohne Reservierung
+87,Q,einzelne Wagen ohne Reservierung,einzelne Wagen ohne Reservierung
+88,Q,keine Qualitätsmängel,keine Qualitätsmängel
+89,Q,Reservierungen sind wieder vorhanden,Reservierungen sind wieder vorhanden
+90,Q,kein gastronomisches Angebot,kein gastronomisches Angebot
+91,Q,fehlende Fahrradbeförderung,Fahrradmitnahme nicht möglich
+92,Q,Eingeschränkte Fahrradbeförderung ,Eingeschränkte Fahrradbeförderung
+93,Q,keine behindertengerechte Einrichtung,behindertengerechte Einrichtung fehlt
+94,Q,Ersatzbewirtschaftung,Ersatzbewirtschaftung
+95,Q,Ohne behindertengerechtes WC,Universal-WC fehlt
+96,Q,Überbesetzung mit Kulanzleistungen,Überbesetzung mit Kulanzleistungen
+97,Q,Überbesetzung ohne Kulanzleistungen,Überbesetzung ohne Kulanzleistungen
+98,Q,sonstige Qualitätsmängel,sonstige Qualitätsmängel
+99,,Verzögerungen im Betriebsablauf,Verzögerungen im Betriebsablauf

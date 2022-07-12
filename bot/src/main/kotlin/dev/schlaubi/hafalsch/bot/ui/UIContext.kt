@@ -1,6 +1,8 @@
 package dev.schlaubi.hafalsch.bot.ui
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.commands.application.ApplicationCommandContext
+import com.kotlindiscord.kord.extensions.commands.application.slash.EphemeralSlashCommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
 import com.kotlindiscord.kord.extensions.components.buttons.PublicInteractionButtonContext
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
@@ -27,22 +29,39 @@ suspend inline fun UIContext.respond(builder: MessageCreateBuilder.() -> Unit) =
     response.createEphemeralFollowup(builder)
 
 @PublishedApi
-internal class SlashCommandUIContext(private val slashCommandContext: PublicSlashCommandContext<*>) : UIContext {
+internal abstract class SlashCommandUIContext : UIContext {
+    abstract val context: ApplicationCommandContext
     override val bundle: String?
-        get() = slashCommandContext.command.resolvedBundle
-    override val response: MessageInteractionResponseBehavior
-        get() = slashCommandContext.interactionResponse
+        get() = context.command.resolvedBundle
     override val kord: Kord
-        get() = slashCommandContext.kord
+        get() = context.kord
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun translate(key: String, vararg arguments: Any?): String = slashCommandContext.translate(
+    override suspend fun translate(key: String, vararg arguments: Any?): String = context.translate(
         key, bundle, arguments as Array<Any?>
     )
 }
 
+@PublishedApi
+internal class PublicSlashCommandUIContext(override val context: PublicSlashCommandContext<*>) :
+    SlashCommandUIContext() {
+    override val response: MessageInteractionResponseBehavior
+        get() = context.interactionResponse
+}
+
+@PublishedApi
+internal class EphemeralSlashCommandUIContext(override val context: EphemeralSlashCommandContext<*>) :
+    SlashCommandUIContext() {
+    override val response: MessageInteractionResponseBehavior
+        get() = context.interactionResponse
+}
+
 inline fun PublicSlashCommandContext<*>.asUIContext(block: UIContext.() -> Unit) {
-    SlashCommandUIContext(this).apply(block)
+    PublicSlashCommandUIContext(this).apply(block)
+}
+
+inline fun EphemeralSlashCommandContext<*>.asUIContext(block: UIContext.() -> Unit) {
+    EphemeralSlashCommandUIContext(this).apply(block)
 }
 
 @PublishedApi

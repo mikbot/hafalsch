@@ -17,6 +17,7 @@ import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
 import dev.schlaubi.hafalsch.bot.database.findForJourney
+import dev.schlaubi.hafalsch.bot.ui.asUIContext
 import dev.schlaubi.hafalsch.bot.ui.filterRelevant
 import dev.schlaubi.hafalsch.bot.ui.format
 import dev.schlaubi.hafalsch.marudor.Marudor
@@ -148,9 +149,11 @@ context(Extension)
 
                     val relevantMessages = state.messages.filterRelevant()
                     if (relevantMessages.isNotEmpty()) {
-                        field {
-                            this.name = translate("commands.traewelling.check-in.messages.title")
-                            value = state.messages.format()
+                        asUIContext {
+                            field {
+                                this.name = translate("commands.traewelling.check-in.messages.title")
+                                value = state.messages.format()
+                            }
                         }
                     }
 

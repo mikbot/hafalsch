@@ -25,15 +25,8 @@ fun MultiButtonPaginatorBuilder.renderStopInfo(
         val hafasMessages = stop.messages.map(HafasMessage::txtN)
 
         val irisMessages = stop.irisMessages
-            .filter { it.head == null }
-            .map {
-                buildString {
-                    if (it.timestamp != null) {
-                        append(it.timestamp!!.toDiscord(TimestampType.ShortTime)).append(':')
-                    }
-                    append(it.text.cancel(it.superseded))
-                }
-            }
+            .filterRelevant()
+            .format()
 
 
         description = (hafasMessages + irisMessages).joinToString("\n")
