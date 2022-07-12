@@ -22,7 +22,7 @@ suspend fun UIContext.sendWaggonOrder(
         coachSequence.sequence.groups.forEach { group ->
             val (coaches, groupName, _, destinationName, trainName, _, model) = group
             coaches.forEach { coach ->
-                val (_, category, closed, uic, type, identificationNumber, _, features, seats) = coach
+                val (_, category, closed, _, type, identificationNumber, _, features, seats) = coach
                 parent.page {
                     val rawTitle = translate("coach_sequence.title", identificationNumber)
                     title = when {
@@ -57,7 +57,7 @@ suspend fun UIContext.sendWaggonOrder(
                     if (model != null) {
                         field {
                             name = translate("coach_sequence.model")
-                            value = model.name
+                            value = model.formatNameWithPlan()
                         }
                     }
 

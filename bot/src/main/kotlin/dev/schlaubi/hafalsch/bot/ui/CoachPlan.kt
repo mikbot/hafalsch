@@ -24,6 +24,24 @@ private val withImage = listOf(
     "DBpbzfa"
 )
 
+private val modelWithPdf = listOf(
+    "401",
+    "402",
+    "403.R",
+    "403.S1",
+    "403.S2",
+    "406",
+    "406.R",
+    "407",
+    "411.S1",
+    "411.S2",
+    "412",
+    "415",
+    "IC2.KISS",
+    "IC2.TWIN",
+    "MET"
+)
+
 private val allowedTypes = listOf("IC", "ICE")
 
 private val seriesRegex = """\.S(\d)""".toRegex()
@@ -61,6 +79,24 @@ fun Coach.findPlan(trainType: String, parent: CoachGroup): String? {
     }
 
     return null
+}
+
+// Taken from: https://cs.github.com/marudor/BahnhofsAbfahrten/blob/31113ff2d669f208847dfa103ea6ed5e61bf2e12/packages/client/Common/Components/Reihung/BRInfo.tsx?q=WRSheets
+fun CoachGroup.Model.findPlan(): String? {
+    return if (identifier in modelWithPdf) {
+        return "https://marudor.de//WRSheets/${identifier}.pdf"
+    } else {
+        null
+    }
+}
+
+fun CoachGroup.Model.formatNameWithPlan(): String {
+    val plan = findPlan()
+    return if (plan == null) {
+        name
+    } else {
+        "[$name]($plan)"
+    }
 }
 
 private fun fullUrl(type: String) = "https://lib.finalrewind.org/dbdb/db_wagen/$type.png"

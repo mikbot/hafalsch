@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.schlaubi.hafalsch.bot.ui.findSpecialTrainEmote
+import dev.schlaubi.hafalsch.bot.ui.formatNameWithPlan
 import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.bot.util.journeyAutoComplete
@@ -129,7 +130,7 @@ context(Extension)
                 if (model != null) {
                     field {
                         this.name = translate("commands.tzn.model.title")
-                        value = model.name
+                        value = model.formatNameWithPlan()
                     }
                 }
                 val specialTrainEmote = group.findSpecialTrainEmote()
