@@ -67,7 +67,7 @@ signing {
         )
 
         publishing.publications.withType<MavenPublication> {
-            //sign(this)
+            sign(this)
         }
     }
 

@@ -3,11 +3,18 @@ package dev.schlaubi.hafalsch.rainbow_ice
 import dev.schlaubi.hafalsch.client.ClientCompanion
 import dev.schlaubi.hafalsch.client.ClientResources
 import dev.schlaubi.hafalsch.client.util.safeBody
+import dev.schlaubi.hafalsch.rainbow_ice.entity.Station
 import dev.schlaubi.hafalsch.rainbow_ice.entity.TrainVehicle
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
+import io.ktor.client.statement.*
 import dev.schlaubi.hafalsch.rainbow_ice.routes.RainbowICE as RainbowICERoute
 
+/**
+ * Mapper of the [regenbogen-ice.de](regenbogen-ice.de) API.
+ *
+ * You might need to import [dev.schlaubi.hafalsch.client.invoke] to use [RainbowICEBuilder]
+ */
 public class RainbowICE(private val resources: ClientResources) {
 
     /**
@@ -36,8 +43,27 @@ public class RainbowICE(private val resources: ClientResources) {
         includeRoutes: Boolean? = null,
         includeMarudorLink: Boolean? = null
     ): TrainVehicle? =
-        resources.client.get(RainbowICERoute.TrainVehicle(query, tripLimit, includeRoutes, includeMarudorLink))
+        resources.client.get(RainbowICERoute.TrainVehicle.Specific(query, tripLimit, includeRoutes, includeMarudorLink))
             .safeBody()
+
+    /**
+     * Provides station autocomplete for [query].
+     *
+     * **This only includes long distance travel stations**
+     */
+    public suspend fun stationSearch(query: String): List<Station> =
+        resources.client.get(RainbowICERoute.StationSearch(query)).body()
+
+    /**
+     *  Returns an RSS feed for the `Regenbogen ICE`.
+     */
+    public suspend fun rss(): HttpResponse = resources.client.get(RainbowICERoute.Rss())
+
+    /**
+     * Returns an RSS feed for the `Regenbogen ICE` at [station].
+     */
+    public suspend fun rss(station: String): HttpResponse =
+        resources.client.get(RainbowICERoute.Rss.ForStation(station))
 
     public companion object : ClientCompanion<RainbowICE, RainbowICEBuilder> {
         override fun newBuilder(): RainbowICEBuilder = RainbowICEBuilder()
