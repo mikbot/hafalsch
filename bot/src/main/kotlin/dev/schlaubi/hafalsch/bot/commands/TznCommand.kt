@@ -20,8 +20,6 @@ import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.stdx.core.isNotNullOrBlank
 import kotlinx.datetime.Instant
 import org.koin.core.component.inject
-import kotlin.math.max
-import kotlin.math.min
 
 class TznJidArguments : Arguments() {
     val jid by string {
@@ -96,13 +94,13 @@ context(Extension)
         coachSequence.sequence.groups.forEach { group ->
             val (coaches, name, _, _, _, number, model) = group
             embed {
-                val a = coaches.firstOrNull { it.identificationNumber.isNotNullOrBlank() }?.identificationNumber?.toInt()
+                val a =
+                    coaches.firstOrNull { it.identificationNumber.isNotNullOrBlank() }?.identificationNumber?.toInt()
                 val b = coaches.lastOrNull { it.identificationNumber.isNotNullOrBlank() }?.identificationNumber?.toInt()
                 title = if (a == null || b == null) {
                     translate("commands.tzn.info.title.unknown")
                 } else {
-                    val begin = min(a, b)
-                    val end = max(a, b)
+                    val (begin, end) = listOf(a, b).sorted()
 
                     translate(
                         "commands.tzn.info.title",
