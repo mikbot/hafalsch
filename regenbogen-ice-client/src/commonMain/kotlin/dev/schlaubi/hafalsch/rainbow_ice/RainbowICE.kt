@@ -34,7 +34,7 @@ public class RainbowICE(private val resources: ClientResources) {
      * Fetches [train information][TrainVehicle] for [query].
      *
      * @param tripLimit How many [trips][TrainVehicle.trips] to fetch
-     * @param includeRoutes whether to include [TrainVehicle.trips]
+     * @param includeRoutes whether to include [TrainVehicle.Trip.stops]
      * @param includeMarudorLink whether to include [TrainVehicle.Trip.marudor]
      */
     public suspend fun fetchTrain(

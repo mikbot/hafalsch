@@ -24,6 +24,12 @@ public data class TrainVehicle(
     val trips: List<Trip>? = null
 ) {
     /**
+     * Safe accessor for [trips] if you know you requested it.
+     */
+    val safeTrips: List<Trip>
+        get() = trips ?: error("Please request with trip_limit > 0 to use this field")
+
+    /**
      * Representation of a trip.
      *
      * @property groupIndex the index of this train (if connected to another train)
@@ -31,7 +37,7 @@ public data class TrainVehicle(
      * @property trainNumber train number of this trip
      * @property originStation name of the origin station
      * @property destinationStation name of the destination station
-     * @property marudor link to [marudor.de]()marudor.de) if requested
+     * @property marudor link to [marudor.de](marudor.de) if requested
      * @property stops list of [Stops][Stop] the train stops at
      */
     @Serializable
@@ -53,8 +59,21 @@ public data class TrainVehicle(
         @SerialName("destination_station")
         val destinationStation: String,
         val marudor: String? = null,
-        val stops: List<Stop>
+        val stops: List<Stop>? = null
     ) {
+
+        /**
+         * Safe accessor for [marudor] if you know it's requested.
+         */
+        val safeMarudor: String
+            get() = marudor ?: error("Please request with include_marudor = true to use this field")
+
+        /**
+         * Safe accessor for [stops] if you know it's requested.
+         */
+        val safeStops: List<Stop>
+            get() = stops ?: error("Please request with include_routes = true to use this field")
+
         /**
          * Representation of a stop.
          *
