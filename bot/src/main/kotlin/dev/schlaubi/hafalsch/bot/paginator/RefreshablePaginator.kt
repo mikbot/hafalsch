@@ -82,31 +82,23 @@ suspend inline fun <T> refreshableMultiButtonPaginator(
     val builder = RefreshablePaginatorBuilder<T>().apply(block)
     lateinit var context: PaginatorContainer
 
-    val send: Resend = { initial ->
-        val data = if (initial && initialData != null) initialData else builder.retriever()
-        multiButtonPaginator(interactionResponse, bundle, defaultGroup, locale) {
-            builder.pageBuilder(this, data)
-            publicButton(2) {
-                emoji(Emojis.repeat.unicode)
+    val paginator = multiButtonPaginator(interactionResponse, bundle, defaultGroup, locale) {
+        builder.pageBuilder(this, initialData ?: builder.retriever())
+        publicButton(2) {
+            emoji(Emojis.repeat.unicode)
 
-                action {
-                    context.paginator.destroy(false)
-                    val newPaginator = context.resend(false)
-                    context = context.copy(newPaginator)
-                    newPaginator.send()
+            action {
+                val newBuilder = MultiButtonPaginatorBuilder(bundle, parent).apply {
+                    builder.pageBuilder(this, builder.retriever())
                 }
+                context.paginator.updatePages(newBuilder.parent.pages)
             }
-        }.apply {
-            builder.paginatorConfigurator?.invoke(this)
         }
     }
 
-    context = PaginatorContainer(send(true), send)
+    context = PaginatorContainer(paginator)
     context.paginator.send()
 }
 
 @PublishedApi
-internal data class PaginatorContainer(
-    val paginator: MultiButtonPaginator,
-    val resend: Resend
-)
+internal data class PaginatorContainer(val paginator: MultiButtonPaginator)

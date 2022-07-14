@@ -24,11 +24,11 @@ data class ComponentDescriptor(val builder: ComponentDescriptorBuilder, val page
 private data class PageComponent(val component: InteractionButtonWithAction<*>, val pages: List<Int>? = null)
 
 class MultiButtonPaginator(
-    pages: Pages,
+    private var myPages: Pages,
     owner: UserBehavior? = null,
     timeoutSeconds: Long? = null,
     keepEmbed: Boolean = true,
-    switchEmoji: ReactionEmoji = if (pages.groups.size == 2) EXPAND_EMOJI else SWITCH_EMOJI,
+    switchEmoji: ReactionEmoji = if (myPages.groups.size == 2) EXPAND_EMOJI else SWITCH_EMOJI,
     bundle: String? = null,
     locale: Locale? = null,
     private val additionalButtons: List<ComponentDescriptor>,
@@ -36,9 +36,9 @@ class MultiButtonPaginator(
 
     private val interaction: MessageInteractionResponseBehavior,
     private val doFollowUp: Boolean = false
-) : BaseButtonPaginator(pages, owner, timeoutSeconds, keepEmbed, switchEmoji, bundle, locale) {
+) : BaseButtonPaginator(myPages, owner, timeoutSeconds, keepEmbed, switchEmoji, bundle, locale) {
     /** Whether this paginator has been set up for the first time. **/
-    var isSetup: Boolean = false
+    private var isSetup: Boolean = false
     private lateinit var pageComponents: List<PageComponent>
     private var followUp: PublicFollowupMessage? = null
 
@@ -48,6 +48,28 @@ class MultiButtonPaginator(
             PageComponent(it.builder.invoke(components, this), it.pages)
         }
     }
+
+    suspend fun updatePages(pages: Pages) {
+        this.myPages = pages
+        goToPage(currentPageNum)
+    }
+
+    private suspend fun goToPage(page: Int, force: Boolean) {
+        if (page == currentPageNum && !force) {
+            return
+        }
+
+        if ((page < 0 || page > pages.groups[currentGroup]!!.size - 1) && !force) {
+            return
+        }
+
+        currentPageNum = page
+        currentPage = myPages.get(currentGroup, currentPageNum)
+
+        send()
+    }
+
+    override suspend fun goToPage(page: Int) = goToPage(page, false)
 
     override suspend fun send() {
         if (!isSetup) {
