@@ -76,6 +76,7 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
                 }
 
                 traewellingSynchronizer.start()
+                notificationExecutor.start()
             }
         }
     }
