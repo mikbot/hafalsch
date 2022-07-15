@@ -36,7 +36,8 @@ public data class Station(
     val id: Int,
     val rilIdentifier: String? = null,
     val name: String,
-    val provider: String? = null
+    val provider: String? = null,
+    val ibnr: Int?=0
 )
 
 @Serializable

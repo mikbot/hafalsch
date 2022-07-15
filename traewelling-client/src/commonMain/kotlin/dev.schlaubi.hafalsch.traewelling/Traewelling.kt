@@ -8,6 +8,9 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.datetime.Instant
 import dev.schlaubi.hafalsch.traewelling.entity.User as UserEntity
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling as TraewellingRoute
@@ -32,10 +35,18 @@ public class Traewelling internal constructor(private val resources: ClientResou
         /**
          * Lists all active statuses for a [username] by [token].
          */
-        public suspend fun listEnroute(username: String, token: String): StatusesList =
-            resources.client.get(TraewellingRoute.User.Specific.Active(username)) {
+        public suspend fun listEnroute(username: String, token: String): List<Status> {
+            val response = resources.client.get(TraewellingRoute.User.Specific.Active(username)) {
                 authenticate(token)
-            }.body()
+            }.body<JsonElement>()
+
+            // Träwelling sometimes returns different respones here
+            return if (response.jsonObject["statuses"] != null) {
+                resources.json.decodeFromJsonElement<UserStatusesList>(response).statuses.data
+            } else {
+                listOf(resources.json.decodeFromJsonElement<Status>(response))
+            }
+        }
     }
 
     public inner class Auth {

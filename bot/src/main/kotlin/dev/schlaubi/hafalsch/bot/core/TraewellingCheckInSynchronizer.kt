@@ -31,7 +31,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
             .toList()
             .parallelMap {
                 val user = traewelling.getUser(it.token)
-                it.id to traewelling.user.listEnroute(user.username, it.token).statuses
+                it.id to traewelling.user.listEnroute(user.username, it.token)
             }
             .toMap()
         LOG.debug { "Found the following check-ins from Träwelling: ${checkIns.values}" }
@@ -54,12 +54,14 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
 
         LOG.debug { "Found the following check-ins to be new: ${newCheckIns.map(Pair<Snowflake, Status>::second)}" }
 
-        val dbCheckIns = newCheckIns.map { (user, trip) ->
+        val dbCheckIns = newCheckIns.mapNotNull { (user, trip) ->
+            val start = trip.trainCheckin.origin.ibnr?.toString() ?: return@mapNotNull null
+            val end = trip.trainCheckIndestination.ibnr?.toString() ?: return@mapNotNull null
             CheckIn(
                 user = user,
                 journeyId = trip.trainCheckin.tripId,
-                start = trip.trainCheckin.originStopOver.trainStation.ibnr.toString(),
-                end = trip.trainCheckin.destinationStopOver.trainStation.ibnr.toString()
+                start = start,
+                end = end
             )
         }
 

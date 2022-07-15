@@ -35,13 +35,14 @@ public abstract class ClientBuilder<T> protected constructor() {
         require(engine == null || httpClient == null) { "Please specify either an engine or an httpClient" }
         val safeUrl = this@ClientBuilder.url ?: defaultUrl
 
+
+        val safeJson = this@ClientBuilder.json ?: Json {
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        }
         val client = (httpClient ?: engine?.let(::HttpClient) ?: HttpClient()).config {
             install(ContentNegotiation) {
-                val json = this@ClientBuilder.json ?: Json {
-                    ignoreUnknownKeys = true
-                    coerceInputValues = true
-                }
-                json(json)
+                json(safeJson)
 
             }
             install(Resources)
@@ -54,7 +55,7 @@ public abstract class ClientBuilder<T> protected constructor() {
             }
         }
 
-        val resources = ClientResources(client, safeUrl)
+        val resources = ClientResources(client, safeUrl, safeJson)
 
         return build(resources)
     }

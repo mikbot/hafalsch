@@ -10,6 +10,12 @@ public data class StatusesList(
 )
 
 @Serializable
+public data class UserStatusesList(
+    val username: String,
+    val statuses: PaginatedResponse<Status>
+)
+
+@Serializable
 public data class Status(
     val id: Int,
     @SerialName("created_at")
@@ -54,7 +60,7 @@ public data class CheckIn(
 public data class MinimalHafasStopOver(
     val id: Int,
     @SerialName("train_station")
-    val trainStation: TrainStation
+    val trainStation: TrainStation? = null
 ) {
     @Serializable
     public data class TrainStation(
