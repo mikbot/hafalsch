@@ -14,6 +14,20 @@ public class Traewelling {
     public data class Getuser(val traewelling: Traewelling = Traewelling())
 
     @Serializable
+    @Resource("user")
+    public data class User(val traewelling: Traewelling = Traewelling()) {
+        @Serializable
+        @Resource("{username}")
+        public data class Specific(val username: String, val user: User = User()) {
+            @Serializable
+            @Resource("active")
+            public data class Active(val specific: Specific) {
+                public constructor(username: String) : this(Specific(username))
+            }
+        }
+    }
+
+    @Serializable
     @Resource("auth")
     public data class Auth(val traewelling: Traewelling = Traewelling()) {
         /**

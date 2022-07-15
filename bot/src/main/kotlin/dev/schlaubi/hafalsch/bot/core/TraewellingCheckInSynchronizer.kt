@@ -30,7 +30,8 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
         val checkIns = Database.traewellingLogins.find(TraevellingUserLogin::expiresAt gte Clock.System.now())
             .toList()
             .parallelMap {
-                it.id to traewelling.statuses.listEnroute(it.token).statuses
+                val user = traewelling.getUser(it.token)
+                it.id to traewelling.user.listEnroute(user.username, it.token).statuses
             }
             .toMap()
         LOG.debug { "Found the following check-ins from Träwelling: ${checkIns.values}" }

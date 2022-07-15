@@ -9,6 +9,7 @@ import io.ktor.client.plugins.resources.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant
+import dev.schlaubi.hafalsch.traewelling.entity.User as UserEntity
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling as TraewellingRoute
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling.Statuses as StatusesRoute
 
@@ -17,14 +18,25 @@ public class Traewelling internal constructor(private val resources: ClientResou
     public val auth: Auth = Auth()
     public val trains: Trains = Trains()
     public val statuses: Statuses = Statuses()
+    public val user: User = User()
 
     /**
      * Retrieves the user for [token].
      */
-    public suspend fun getUser(token: String): User =
+    public suspend fun getUser(token: String): UserEntity =
         resources.client.get(TraewellingRoute.Getuser()) {
             authenticate(token)
         }.body()
+
+    public inner class User {
+        /**
+         * Lists all active statuses for a [username] by [token].
+         */
+        public suspend fun listEnroute(username: String, token: String): StatusesList =
+            resources.client.get(TraewellingRoute.User.Specific.Active(username)) {
+                authenticate(token)
+            }.body()
+    }
 
     public inner class Auth {
 
