@@ -170,7 +170,7 @@ context(Extension)
                                     val mention = if (foundAccount != null) {
                                         kord.unsafe.user(foundAccount.id).mention
                                     } else {
-                                        "@${it.username}"
+                                        "[@${it.username}](${Config.TRÄWELLING_API}/@${it.username})"
                                     }
 
                                     "- $mention (${it.points} pts - ${it.trainDistance} km)"
