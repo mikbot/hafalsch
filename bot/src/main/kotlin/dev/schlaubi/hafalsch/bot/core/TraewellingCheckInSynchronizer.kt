@@ -56,7 +56,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
 
         val dbCheckIns = newCheckIns.mapNotNull { (user, trip) ->
             val start = trip.trainCheckin.origin.ibnr?.toString() ?: return@mapNotNull null
-            val end = trip.trainCheckIndestination.ibnr?.toString() ?: return@mapNotNull null
+            val end = trip.trainCheckin.destination.ibnr?.toString() ?: return@mapNotNull null
             CheckIn(
                 user = user,
                 journeyId = trip.trainCheckin.tripId,

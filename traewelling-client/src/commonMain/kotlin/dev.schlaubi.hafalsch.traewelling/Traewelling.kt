@@ -38,10 +38,13 @@ public class Traewelling internal constructor(private val resources: ClientResou
         public suspend fun listEnroute(username: String, token: String): List<Status> {
             val response = resources.client.get(TraewellingRoute.User.Specific.Active(username)) {
                 authenticate(token)
-            }.body<JsonElement>()
+            }.body<JsonElement>().jsonObject
 
             // Träwelling sometimes returns different respones here
-            return if (response.jsonObject["statuses"] != null) {
+
+            return if(response.size == 0) {
+                emptyList()
+            } else if (response["statuses"] != null) {
                 resources.json.decodeFromJsonElement<UserStatusesList>(response).statuses.data
             } else {
                 listOf(resources.json.decodeFromJsonElement<Status>(response))
