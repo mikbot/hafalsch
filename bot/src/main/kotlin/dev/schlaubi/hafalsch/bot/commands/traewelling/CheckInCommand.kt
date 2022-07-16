@@ -13,6 +13,7 @@ import dev.kord.common.annotation.KordUnsafe
 import dev.kord.rest.builder.message.create.embed
 import dev.schlaubi.hafalsch.bot.command.traeewelling.*
 import dev.schlaubi.hafalsch.bot.core.saveState
+import dev.schlaubi.hafalsch.bot.config.Config
 import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
@@ -21,6 +22,7 @@ import dev.schlaubi.hafalsch.bot.ui.asUIContext
 import dev.schlaubi.hafalsch.bot.ui.filterRelevant
 import dev.schlaubi.hafalsch.bot.ui.format
 import dev.schlaubi.hafalsch.marudor.Marudor
+import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.hafalsch.traewelling.entity.CheckInRequest
 import dev.schlaubi.hafalsch.traewelling.entity.User
@@ -147,7 +149,8 @@ context(Extension)
                         value = translate("commands.traewelling.check-in.delay.description", arrayOf(currentDelay, delayAtExit))
                     }
 
-                    val relevantMessages = state.messages.filterRelevant()
+                    val relevantMessages = state.messages
+                        .filter { it.type == IrisMessage.Type.SERVICE_MESSAGE }
                     if (relevantMessages.isNotEmpty()) {
                         asUIContext {
                             field {

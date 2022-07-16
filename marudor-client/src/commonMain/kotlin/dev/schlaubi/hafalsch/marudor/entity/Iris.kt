@@ -11,6 +11,9 @@ import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import kotlin.collections.Map as CollectionMap
 
+private val qualityMessagesRange = 0..69
+private val serviceMessagesRange = 70..1000 // includes 900 and 1000
+
 @Serializable
 public data class IrisMessage(
     val text: String,
@@ -21,6 +24,23 @@ public data class IrisMessage(
     val value: Int? = null,
     val stopPlace: HafasStation? = null
 ) {
+
+    public val type: Type?
+        get() {
+            val safeValue = value ?: return null
+
+            return when(safeValue) {
+               in qualityMessagesRange -> Type.QUALITY_MESSAGE
+               in serviceMessagesRange -> Type.SERVICE_MESSAGE
+               else -> null
+            }
+        }
+
+    public enum class Type {
+        SERVICE_MESSAGE,
+        QUALITY_MESSAGE
+    }
+
     @Serializable(with = Priority.Serializer::class)
     public enum class Priority(override val value: Int) : NumberedEnum {
         HIGH(1),
