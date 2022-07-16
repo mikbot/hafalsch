@@ -21,7 +21,8 @@ suspend fun Marudor.detailsByJourneyId(journeyId: String): JourneyInformation? {
         // https://marudor.de/details/ICE%20517/2022-07-08T05:29:00.000Z
         val (trainName, departureRaw) = url.pathSegments.drop(2)
         val departure = Instant.parse(departureRaw)
-        hafas.details(trainName, date = departure)
+        val eva = url.parameters["stopEva"]
+        hafas.details(trainName, date = departure, station = eva)
     } else {
         null
     }
