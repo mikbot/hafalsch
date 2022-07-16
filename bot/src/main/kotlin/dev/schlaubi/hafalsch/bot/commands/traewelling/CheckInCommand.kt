@@ -176,7 +176,7 @@ context(Extension)
                                         "[@${it.username}](${Config.TRÄWELLING_API}/@${it.username})"
                                     }
 
-                                    "- $mention (${it.points} pts - ${it.trainDistance} km)"
+                                    "- $mention (${it.points} pts - ${it.trainDistance / 1000} km)"
                                 }
                         }
                     }
