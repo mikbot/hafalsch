@@ -110,7 +110,7 @@ context(Extension)
                 }
 
 
-                val probableTzn = name.replace(type, "").trim().trim('0')
+                val probableTzn = name.replace(type, "").trim().trimStart('0')
                 val tznExists = rainbowICE.matchTrain(probableTzn)
                 val tznJourney = rainbowICE.fetchTrain(probableTzn, 5, true)
                 val probableJourney = tznJourney?.trips?.firstOrNull { journey ->
