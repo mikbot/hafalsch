@@ -12,14 +12,13 @@ import dev.kord.common.annotation.KordExperimental
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.rest.builder.message.create.embed
 import dev.schlaubi.hafalsch.bot.command.traeewelling.*
-import dev.schlaubi.hafalsch.bot.core.saveState
 import dev.schlaubi.hafalsch.bot.config.Config
+import dev.schlaubi.hafalsch.bot.core.saveState
 import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
 import dev.schlaubi.hafalsch.bot.database.findForJourney
 import dev.schlaubi.hafalsch.bot.ui.asUIContext
-import dev.schlaubi.hafalsch.bot.ui.filterRelevant
 import dev.schlaubi.hafalsch.bot.ui.format
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
@@ -155,7 +154,7 @@ context(Extension)
                         asUIContext {
                             field {
                                 this.name = translate("commands.traewelling.check-in.messages.title")
-                                value = state.messages.format()
+                                value = relevantMessages.format()
                             }
                         }
                     }
