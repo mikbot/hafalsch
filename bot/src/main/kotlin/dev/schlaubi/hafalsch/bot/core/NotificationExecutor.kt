@@ -153,7 +153,7 @@ private suspend fun UIContext.sendStatus(
 
                 val relevantMessages = stop.irisMessages.filterRelevant()
 
-                if (stop.irisMessages.isNotEmpty()) {
+                if (relevantMessages.isNotEmpty()) {
                     field {
                         name = translate("notification.delay.likely_reasons")
                         value = relevantMessages.format()
@@ -167,7 +167,9 @@ private suspend fun UIContext.sendStatus(
     val embeds = buildList {
         if (notificationSettings.currentDelayMargin != 0) {
             val currentStation = currentStatus.currentStop?.station?.id
-            if (currentStation != null && currentStation != checkIn.end) {
+            val currentIndex = currentStatus.stops.indexOfFirst { it.station.id == currentStation }
+            val stopIndex = currentStatus.stops.indexOfFirst { it.station.id == checkIn.end }
+            if (currentIndex < stopIndex && currentStation != null && currentStation != checkIn.end) {
                 addDelayChange(currentStation, notificationSettings.currentDelayMargin, "at_current_stop")
             }
         }
@@ -199,7 +201,8 @@ private suspend fun UIContext.sendStatus(
 
                     action {
                         asUIContext {
-                            journey(JourneyData(currentStatus.train.name, null, currentStatus.departure.time, null))
+                            val station = currentStatus.currentStop?.station?.let { marudor.stopPlace.byEva(it.id) }
+                            journey(JourneyData(currentStatus.train.name, station, currentStatus.departure.time, null))
                         }
                     }
                 }
