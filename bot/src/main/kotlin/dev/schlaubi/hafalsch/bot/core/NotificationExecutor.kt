@@ -37,12 +37,12 @@ class NotificationExecutor : RepeatingTask() {
 
     override suspend fun run() {
         val checkIns = Database.checkIns.find()
-            .toList()
-            .groupBy(CheckIn::journeyId)
+                .toList()
+                .groupBy(CheckIn::journeyId)
 
         val currentStatuses = Database.journeyStates.find(JourneyState::journeyId `in` checkIns.keys)
-            .toList()
-            .associateBy(JourneyState::journeyId)
+                .toList()
+                .associateBy(JourneyState::journeyId)
 
 
         coroutineScope {
@@ -68,7 +68,7 @@ class NotificationExecutor : RepeatingTask() {
                                 launch {
                                     val result = runCatching {
                                         val notificationSettings =
-                                            Database.subscriptionSettings.findOneByIdSafe(checkIn.user)
+                                                Database.subscriptionSettings.findOneByIdSafe(checkIn.user)
                                         withUIContext(notificationSettings.locale) {
                                             sendStatus(checkIn, currentStatus, currentSavedStatus, notificationSettings)
                                         }
@@ -87,7 +87,16 @@ class NotificationExecutor : RepeatingTask() {
     }
 }
 
-private fun delayDifference(current: Int, before: Int?) = abs(current - (before ?: 0))
+private fun delayDifference(current: Int?, before: Int?): Int {
+    val (safeCurrent, safeBefore) = when {
+        current == null && before == null -> return 0
+        before == null -> current!! to 0
+        current == null -> 0 to before
+        else -> current to before
+    }
+
+    return abs(safeCurrent - safeBefore)
+}
 
 suspend fun CheckIn.saveState(marudor: Marudor): JourneyState {
     val currentStatus = marudor.detailsByJourneyId(journeyId) ?: discordError("Could not find journey details")
@@ -99,15 +108,15 @@ suspend fun CheckIn.saveState(marudor: Marudor): JourneyState {
 
 @OptIn(KordUnsafe::class, KordExperimental::class)
 private suspend fun UIContext.sendStatus(
-    checkIn: CheckIn,
-    currentStatus: JourneyInformation,
-    previousStatus: JourneyState?,
-    notificationSettings: SubscribtionSettings
+        checkIn: CheckIn,
+        currentStatus: JourneyInformation,
+        previousStatus: JourneyState?,
+        notificationSettings: SubscribtionSettings
 ) {
     suspend fun MutableList<EmbedBuilder>.addDelayChange(
-        stationId: String,
-        limit: Int,
-        type: String
+            stationId: String,
+            limit: Int,
+            type: String
     ) {
         val stop = currentStatus.stops.firstOrNull { it.station.id == stationId } ?: return
         val arrival = stop.arrival ?: return
@@ -118,29 +127,29 @@ private suspend fun UIContext.sendStatus(
                 description = if (stop.departure?.delay != stop.arrival?.delay) {
                     if (stop.departure != null) {
                         translate(
-                            "notification.delay_change.$type.description.decrease",
-                            stop.station.title,
-                            arrival.delay,
-                            arrival.time.toMessageFormat(DiscordTimestampStyle.RelativeTime),
-                            stop.departure?.delay,
-                            stop.departure?.time?.toMessageFormat(DiscordTimestampStyle.ShortTime),
+                                "notification.delay_change.$type.description.decrease",
+                                stop.station.title,
+                                arrival.delay,
+                                arrival.time.toMessageFormat(DiscordTimestampStyle.RelativeTime),
+                                stop.departure?.delay ?: 0,
+                                stop.departure?.time?.toMessageFormat(DiscordTimestampStyle.ShortTime),
                         )
                     } else {
                         translate(
-                            "notification.delay_change.$type.description.no_departure",
-                            stop.station.title,
-                            arrival.delay,
-                            arrival.time.toMessageFormat(DiscordTimestampStyle.RelativeTime)
+                                "notification.delay_change.$type.description.no_departure",
+                                stop.station.title,
+                                arrival.delay ?: 0,
+                                arrival.time.toMessageFormat(DiscordTimestampStyle.RelativeTime)
                         )
                     }
                 } else {
                     translate(
-                        "notification.delay_change.$type.description",
-                        stop.station.title,
-                        arrival.delay,
-                        arrival.time.toMessageFormat(DiscordTimestampStyle.RelativeTime),
-                        currentStatus.train.operator?.name
-                            ?: translate("notification.delay_change.unknown_operator")
+                            "notification.delay_change.$type.description",
+                            stop.station.title,
+                            arrival.delay ?: 0,
+                            arrival.time.toMessageFormat(DiscordTimestampStyle.RelativeTime),
+                            currentStatus.train.operator?.name
+                                    ?: translate("notification.delay_change.unknown_operator")
 
                     )
                 }
@@ -178,8 +187,8 @@ private suspend fun UIContext.sendStatus(
         }
 
         val newMessages = currentStatus.currentStop?.irisMessages
-            ?.filter { it !in (previousStatus?.messages ?: emptyList()) }
-            ?: emptyList()
+                ?.filter { it !in (previousStatus?.messages ?: emptyList()) }
+                ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
             embed {
@@ -212,5 +221,7 @@ private suspend fun UIContext.sendStatus(
 }
 
 private fun JourneyInformation.toState() = JourneyState(
-    journeyId, currentStop?.irisMessages ?: emptyList(), stops.associate { it.station.id to (it.arrival?.delay ?: 0) }
+        journeyId, currentStop?.irisMessages ?: emptyList(), stops.associate {
+    it.station.id to (it.arrival?.delay ?: 0)
+}
 )
