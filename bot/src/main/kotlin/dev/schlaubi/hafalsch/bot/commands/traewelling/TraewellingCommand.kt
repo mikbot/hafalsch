@@ -1,9 +1,9 @@
 package dev.schlaubi.hafalsch.bot.commands.traewelling
 
-import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
+import dev.schlaubi.hafalsch.bot.core.HafalschModule
 
-suspend fun Extension.traewellingCommand() = publicSlashCommand {
+suspend fun HafalschModule.traewellingCommand() = publicSlashCommand {
     name = "träwelling"
     description = "<unused>"
 
@@ -11,4 +11,5 @@ suspend fun Extension.traewellingCommand() = publicSlashCommand {
     logoutCommand()
     simpleCheckInCommand()
     extendedCheckInCommand()
+    checkOutCommand()
 }

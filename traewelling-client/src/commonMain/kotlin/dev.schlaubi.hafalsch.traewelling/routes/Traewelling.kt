@@ -131,6 +131,10 @@ public class Traewelling {
     @Resource("statuses")
     public data class Statuses(val traewelling: Traewelling = Traewelling()) {
         @Serializable
+        @Resource("{id}")
+        public data class Specific(val id: Int, val statuses: Statuses = Statuses())
+
+        @Serializable
         @Resource("enroute")
         public data class EnRoute(val statuses: Statuses = Statuses()) {
             @Serializable

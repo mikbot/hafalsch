@@ -6,13 +6,13 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.i
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
-import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordExperimental
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.rest.builder.message.create.embed
-import dev.schlaubi.hafalsch.bot.command.traeewelling.*
+import dev.schlaubi.hafalsch.bot.command.traewelling.*
 import dev.schlaubi.hafalsch.bot.config.Config
+import dev.schlaubi.hafalsch.bot.core.HafalschModule
 import dev.schlaubi.hafalsch.bot.core.saveState
 import dev.schlaubi.hafalsch.bot.database.CheckIn
 import dev.schlaubi.hafalsch.bot.database.Database
@@ -20,13 +20,10 @@ import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
 import dev.schlaubi.hafalsch.bot.database.findForJourney
 import dev.schlaubi.hafalsch.bot.ui.asUIContext
 import dev.schlaubi.hafalsch.bot.ui.format
-import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
-import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.hafalsch.traewelling.entity.CheckInRequest
 import dev.schlaubi.hafalsch.traewelling.entity.User
 import dev.schlaubi.mikbot.plugin.api.util.kord
-import org.koin.core.component.inject
 import org.litote.kmongo.`in`
 
 interface CheckInArguments {
@@ -90,22 +87,19 @@ class ExtendedCheckInArguments : SimpleCheckInArguments() {
     }
 }
 
-context(Extension)
+context(HafalschModule)
         suspend fun PublicSlashCommand<*>.simpleCheckInCommand() = checkInCommand("check-in", ::SimpleCheckInArguments)
 
-context(Extension)
+context(HafalschModule)
         suspend fun PublicSlashCommand<*>.extendedCheckInCommand() =
     checkInCommand("extended-check-in", ::ExtendedCheckInArguments)
 
-context(Extension)
+context(HafalschModule)
         @OptIn(KordUnsafe::class, KordExperimental::class)
         private suspend fun <A> PublicSlashCommand<*>.checkInCommand(name: String, argumentsBuilder: () -> A)
         where A : Arguments, A : CheckInArguments = ephemeralSubCommand(argumentsBuilder) {
     this.name = name
     description = "commands.check_in.description"
-
-    val traewelling by inject<Traewelling>()
-    val marudor by inject<Marudor>()
 
     action {
         val request = CheckInRequest(

@@ -5,10 +5,13 @@ import com.kotlindiscord.kord.extensions.commands.CommandContext
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.Validator
 import com.kotlindiscord.kord.extensions.parser.StringParser
+import dev.kord.core.entity.interaction.AutoCompleteInteraction
 import dev.kord.core.entity.interaction.OptionValue
 import dev.kord.core.entity.interaction.StringOptionValue
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
+
+const val autoCompleteInjection = """autoComplete { with(converter) { onAutoComplete() } }"""
 
 abstract class AutoCompletingArgument<T : Any>(validator: Validator<T> = null) :
     SingleConverter<T>(validator) {
@@ -26,6 +29,7 @@ abstract class AutoCompletingArgument<T : Any>(validator: Validator<T> = null) :
     }
 
     protected abstract suspend fun parseText(text: String, context: CommandContext): Boolean
+    abstract suspend fun AutoCompleteInteraction.onAutoComplete()
     override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder =
         StringChoiceBuilder(arg.displayName, arg.description).apply { required = true }
 }

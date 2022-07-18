@@ -23,12 +23,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import mu.KotlinLogging
+import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
 import dev.schlaubi.mikbot.plugin.api.config.Config as BotConfig
 
-
-private val LOG = KotlinLogging.logger { }
 
 @Serializable
 private data class TraewellingError(val error: String)
@@ -107,6 +105,9 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 class HafalschModule : Extension() {
     override val name: String = "Hafalsch"
     override val bundle: String = dev.schlaubi.hafalsch.bot.util.bundle
+    val rainbowICE by inject<RainbowICE>()
+    val marudor by inject<Marudor>()
+    val traewelling by inject<Traewelling>()
 
     override suspend fun setup() {
         stationCommand()

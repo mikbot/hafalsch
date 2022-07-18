@@ -5,22 +5,19 @@ import com.kotlindiscord.kord.extensions.commands.CommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import dev.schlaubi.hafalsch.bot.core.HafalschModule
 import dev.schlaubi.hafalsch.bot.ui.findSpecialTrainEmote
 import dev.schlaubi.hafalsch.bot.ui.formatNameWithPlan
 import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.bot.util.journeyAutoComplete
-import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.CoachSequence
-import dev.schlaubi.hafalsch.rainbow_ice.RainbowICE
 import dev.schlaubi.hafalsch.rainbow_ice.entity.TrainVehicle
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.stdx.core.isNotNullOrBlank
 import kotlinx.datetime.Instant
-import org.koin.core.component.inject
 
 class TznJidArguments : Arguments() {
     val jid by string {
@@ -40,10 +37,9 @@ class TznNameArguments : Arguments() {
 
 private suspend fun CommandContext.noData(): Nothing = discordError(translate("commands.tzn.no_data"))
 
-suspend fun Extension.tznCommand() = publicSlashCommand {
+suspend fun HafalschModule.tznCommand() = publicSlashCommand {
     name = "tzn"
     description = "<unused>"
-    val marudor by inject<Marudor>()
 
     publicSubCommand(::TznJidArguments) {
         name = "by-jid"
@@ -81,10 +77,8 @@ suspend fun Extension.tznCommand() = publicSlashCommand {
     }
 }
 
-context(Extension)
+context(HafalschModule)
         suspend fun PublicSlashCommandContext<*>.tznCommand(coachSequence: CoachSequence?, initialDeparture: Instant) {
-    val rainbowICE by inject<RainbowICE>()
-
     if (coachSequence == null || !coachSequence.isRealtime || coachSequence.sequence.groups.isEmpty()) {
         noData()
     }

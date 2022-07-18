@@ -1,4 +1,4 @@
-package dev.schlaubi.hafalsch.bot.command.traeewelling
+package dev.schlaubi.hafalsch.bot.command.traewelling
 
 import com.kotlindiscord.kord.extensions.checks.interactionFor
 import com.kotlindiscord.kord.extensions.commands.CommandContext
@@ -12,8 +12,9 @@ import dev.kord.core.behavior.interaction.suggestString
 import dev.kord.core.entity.interaction.AutoCompleteInteraction
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.schlaubi.hafalsch.bot.command.AutoCompletingArgument
+import dev.schlaubi.hafalsch.bot.command.autoCompleteInjection
 import dev.schlaubi.hafalsch.bot.command.sortByRelevance
-import dev.schlaubi.hafalsch.bot.command.traeewelling.TraewellingStationConverter.Companion.safeIbnr
+import dev.schlaubi.hafalsch.bot.command.traewelling.TraewellingStationConverter.Companion.safeIbnr
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import kotlinx.datetime.Clock
@@ -29,16 +30,17 @@ private val format = DateTimeFormatter.ofPattern("HH:mm")
     "trip",
 
     types = [ConverterType.SINGLE],
-    builderBuildFunctionStatements = [
-        "autoComplete { with(converter) { onAutoComplete() } }"
-    ]
+    builderBuildFunctionStatements = [autoCompleteInjection]
 )
 class TripConverter(validator: Validator<JourneyInfo> = null) : AutoCompletingArgument<JourneyInfo>(validator) {
     private val traewelling by inject<Traewelling>()
     override val signatureTypeString: String = "Trip"
 
     override fun withBuilder(builder: ConverterBuilder<JourneyInfo>): SingleConverter<JourneyInfo> {
-        val builderWithName = builder.apply { name = Companion.name }
+        val builderWithName = builder.apply {
+            @Suppress("RedundantCompanionReference")
+            name = Companion.name
+        }
         return super.withBuilder(builderWithName)
     }
 
@@ -57,7 +59,7 @@ class TripConverter(validator: Validator<JourneyInfo> = null) : AutoCompletingAr
         return true
     }
 
-    suspend fun AutoCompleteInteraction.onAutoComplete() {
+    override suspend fun AutoCompleteInteraction.onAutoComplete() {
         val stationRaw = command.options[TraewellingStationConverter.name]?.value?.toString()
         withToken {
             val ibnr = stationRaw?.safeIbnr(token)
@@ -83,19 +85,19 @@ class TripConverter(validator: Validator<JourneyInfo> = null) : AutoCompletingAr
                 departures.departures
                     .filter { it.direction != null }
                     .sortByRelevance(focusedOption.value) { it.line.name }
-                    .take(25).forEach { departure ->
-                        val time = departure.time?.let { format.format(OffsetDateTime.parse(it)) }
+                    .take(25).forEach { (tripId, stop, departureTime, _, delay, _, _, direction, _, line) ->
+                        val time = departureTime?.let { format.format(OffsetDateTime.parse(it)) }
                         val timeInfo = buildString {
                             if (time != null) {
                                 append('(').append(time).append(')')
                             }
-                            if (departure.delay != 0) {
-                                append("+(").append(departure.delay / 60).append(')')
+                            if (delay != 0) {
+                                append("+(").append(delay / 60).append(')')
                             }
                         }
                         choice(
-                            "${departure.line.name} -> ${departure.direction} $timeInfo",
-                            "$jidPrefix${departure.tripId}:${departure.line.name}:${departure.stop.id}"
+                            "${line.name} -> $direction $timeInfo",
+                            "$jidPrefix${tripId}:${line.name}:${stop.id}"
                         )
                     }
             }

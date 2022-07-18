@@ -1,4 +1,4 @@
-package dev.schlaubi.hafalsch.bot.command.traeewelling
+package dev.schlaubi.hafalsch.bot.command.traewelling
 
 import com.kotlindiscord.kord.extensions.checks.interactionFor
 import com.kotlindiscord.kord.extensions.commands.CommandContext
@@ -9,9 +9,10 @@ import dev.kord.core.behavior.interaction.suggestString
 import dev.kord.core.entity.interaction.AutoCompleteInteraction
 import dev.kord.core.entity.interaction.ChatInputCommandInteraction
 import dev.schlaubi.hafalsch.bot.command.AutoCompletingArgument
+import dev.schlaubi.hafalsch.bot.command.autoCompleteInjection
 import dev.schlaubi.hafalsch.bot.command.sortByRelevance
-import dev.schlaubi.hafalsch.bot.command.traeewelling.TraewellingStationConverter.Companion.safeIbnr
-import dev.schlaubi.hafalsch.bot.command.traeewelling.TripConverter.Companion.safeJid
+import dev.schlaubi.hafalsch.bot.command.traewelling.TraewellingStationConverter.Companion.safeIbnr
+import dev.schlaubi.hafalsch.bot.command.traewelling.TripConverter.Companion.safeJid
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import org.koin.core.component.inject
@@ -20,9 +21,7 @@ import org.koin.core.component.inject
     "exit",
 
     types = [ConverterType.SINGLE],
-    builderBuildFunctionStatements = [
-        "autoComplete { with(converter) { onAutoComplete() } }"
-    ]
+    builderBuildFunctionStatements = [autoCompleteInjection]
 )
 class ExitConverter(validator: Validator<String> = null) : AutoCompletingArgument<String>(validator) {
     private val traewelling by inject<Traewelling>()
@@ -56,7 +55,7 @@ class ExitConverter(validator: Validator<String> = null) : AutoCompletingArgumen
         return true
     }
 
-    suspend fun AutoCompleteInteraction.onAutoComplete() {
+    override suspend fun AutoCompleteInteraction.onAutoComplete() {
         val stationRaw = command.options[TraewellingStationConverter.name]?.value?.toString()
         val tripRaw = command.options[TripConverter.name]?.value?.toString()
         withToken {

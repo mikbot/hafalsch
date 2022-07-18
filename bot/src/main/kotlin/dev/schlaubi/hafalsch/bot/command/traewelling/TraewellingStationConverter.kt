@@ -1,4 +1,4 @@
-package dev.schlaubi.hafalsch.bot.command.traeewelling
+package dev.schlaubi.hafalsch.bot.command.traewelling
 
 import com.kotlindiscord.kord.extensions.commands.CommandContext
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
@@ -11,6 +11,7 @@ import dev.kord.core.behavior.interaction.suggest
 import dev.kord.core.behavior.interaction.suggestString
 import dev.kord.core.entity.interaction.AutoCompleteInteraction
 import dev.schlaubi.hafalsch.bot.command.AutoCompletingArgument
+import dev.schlaubi.hafalsch.bot.command.autoCompleteInjection
 import dev.schlaubi.hafalsch.traewelling.Traewelling
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.mikbot.plugin.api.util.safeInput
@@ -20,14 +21,13 @@ import org.koin.core.component.inject
     "traewellingStation",
 
     types = [ConverterType.SINGLE],
-    builderBuildFunctionStatements = [
-        "autoComplete { with(converter) { onAutoComplete() } }"
-    ]
+    builderBuildFunctionStatements = [autoCompleteInjection]
 )
 class TraewellingStationConverter(validator: Validator<Int> = null) : AutoCompletingArgument<Int>(validator) {
     private val traewelling by inject<Traewelling>()
     override val signatureTypeString: String = "Station"
     override fun withBuilder(builder: ConverterBuilder<Int>): SingleConverter<Int> {
+        @Suppress("RedundantCompanionReference")
         val builderWithName = builder.apply { name = Companion.name }
         return super.withBuilder(builderWithName)
     }
@@ -42,7 +42,7 @@ class TraewellingStationConverter(validator: Validator<Int> = null) : AutoComple
         return true
     }
 
-    suspend fun AutoCompleteInteraction.onAutoComplete() {
+    override suspend fun AutoCompleteInteraction.onAutoComplete() {
         withToken {
             val safeInput = focusedOption.safeInput
 

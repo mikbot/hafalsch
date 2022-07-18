@@ -8,10 +8,10 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import dev.schlaubi.hafalsch.traewelling.entity.User as UserEntity
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling as TraewellingRoute
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling.Statuses as StatusesRoute
@@ -42,12 +42,12 @@ public class Traewelling internal constructor(private val resources: ClientResou
 
             // Träwelling sometimes returns different respones here
 
-            return if(response.size == 0) {
+            return if (response.isEmpty()) {
                 emptyList()
             } else if (response["statuses"] != null) {
                 resources.json.decodeFromJsonElement<UserStatusesList>(response).statuses.data
             } else {
-                listOf(resources.json.decodeFromJsonElement<Status>(response))
+                listOf(resources.json.decodeFromJsonElement(response))
             }
         }
     }
@@ -55,7 +55,7 @@ public class Traewelling internal constructor(private val resources: ClientResou
     public inner class Auth {
 
         /**
-         * Retrieves a [TokenResponse] for [username] and [password].
+         * Retrieves a [TokenResponse] for [email] and [password].
          */
         public suspend fun login(email: String, password: String): TokenResponse? =
             resources.client.post(TraewellingRoute.Auth.Login()) {
@@ -133,6 +133,22 @@ public class Traewelling internal constructor(private val resources: ClientResou
             resources.client.get(StatusesRoute.EnRoute.All()) {
                 authenticate(token)
             }.body()
+
+        /**
+         * Deletes the status corresponding to [id].
+         */
+        public suspend fun delete(id: Int, token: String): Unit =
+            resources.client.delete(StatusesRoute.Specific(id)) {
+                authenticate(token)
+            }.body()
+
+        /**
+         * Deletes the status corresponding to [id].
+         */
+        public suspend fun fetch(id: Int, token: String): Status? =
+            resources.client.get(StatusesRoute.Specific(id)) {
+                authenticate(token)
+            }.safeBody()
     }
 
     private fun HttpRequestBuilder.authenticate(token: String) {

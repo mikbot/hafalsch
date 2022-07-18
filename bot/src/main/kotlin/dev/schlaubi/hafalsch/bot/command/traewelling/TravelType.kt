@@ -1,4 +1,4 @@
-package dev.schlaubi.hafalsch.bot.command.traeewelling
+package dev.schlaubi.hafalsch.bot.command.traewelling
 
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling.Trains.Stationboard.TravelType as TraewellingTravelType

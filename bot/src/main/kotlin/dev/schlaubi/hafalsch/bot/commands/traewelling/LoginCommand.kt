@@ -2,7 +2,6 @@ package dev.schlaubi.hafalsch.bot.commands.traewelling
 
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.ButtonStyle
@@ -13,20 +12,17 @@ import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.ModalSubmitInteractionCreateEvent
 import dev.kord.rest.builder.message.create.actionRow
+import dev.schlaubi.hafalsch.bot.core.HafalschModule
 import dev.schlaubi.hafalsch.bot.database.Database
 import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
-import dev.schlaubi.hafalsch.traewelling.Traewelling
-import org.koin.core.component.inject
 
 private val loginCommand = "träwelling_login"
 private val loginModal = "träwelling_login_modal"
 private val loginModalEmail = "träwelling_login_modal_email"
 private val loginModalPassword = "träwelling_login_modal_password"
 
-context(Extension)
+context(HafalschModule)
         suspend fun PublicSlashCommand<*>.loginCommand() {
-    val traewelling by inject<Traewelling>()
-
     ephemeralSubCommand {
         name = "login"
         description = "commands.traewelling.login.description"
