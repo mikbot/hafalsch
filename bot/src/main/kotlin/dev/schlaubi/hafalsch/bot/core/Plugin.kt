@@ -1,5 +1,6 @@
 package dev.schlaubi.hafalsch.bot.core
 
+import ch.qos.logback.classic.Level
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.loadModule
@@ -22,8 +23,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import mu.KotlinLogging
 import kotlin.time.Duration.Companion.minutes
+import dev.schlaubi.mikbot.plugin.api.config.Config as BotConfig
 
+
+private val LOG = KotlinLogging.logger { }
 
 @Serializable
 private data class TraewellingError(val error: String)
@@ -32,19 +37,27 @@ private data class TraewellingError(val error: String)
 class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
     private val traewellingSynchronizer = TraewellingCheckInSynchronizer()
     private val notificationExecutor = NotificationExecutor()
-    private val marudor = Marudor()
-    private val rainbowICE = RainbowICE()
+    private val baseClient = HttpClient {
+        Logging {
+            level = when(BotConfig.LOG_LEVEL) {
+                Level.TRACE -> LogLevel.ALL
+                Level.DEBUG -> LogLevel.BODY
+                else -> LogLevel.NONE
+            }
+            logger = Logger.DEFAULT
+        }
+    }
+
+    private val marudor = Marudor {
+        httpClient = baseClient
+    }
+    private val rainbowICE = RainbowICE {
+        httpClient = baseClient
+    }
     private val traewelling = Traewelling {
         url(Config.TRÄWELLING_API)
-        httpClient = HttpClient {
+        httpClient = baseClient.config {
             expectSuccess = true
-            Logging {
-                level = LogLevel.ALL
-                logger = object : Logger {
-                    override fun log(message: String) = println(message)
-                }
-            }
-
             HttpResponseValidator {
                 handleResponseExceptionWithRequest { exception, _ ->
                     val clientException =

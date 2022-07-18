@@ -73,6 +73,9 @@ public class Traewelling {
                 @SerialName("nationalExpress")
                 NATIONAL_EXPRESS,
 
+                @SerialName("express")
+                LONG_DISTANCE_TRAVEL,
+
                 @SerialName("national")
                 NATIONAL,
 

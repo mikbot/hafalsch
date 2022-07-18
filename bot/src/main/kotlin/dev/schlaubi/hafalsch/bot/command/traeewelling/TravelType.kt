@@ -6,6 +6,7 @@ import dev.schlaubi.hafalsch.traewelling.routes.Traewelling.Trains.Stationboard.
 enum class TravelType(val parent: TraewellingTravelType, override val readableName: String) : ChoiceEnum {
     NATIONAL_EXPRESS(TraewellingTravelType.NATIONAL_EXPRESS, "traewelling.travel_type.national_express"),
     NATIONAL(TraewellingTravelType.NATIONAL, "traewelling.travel_type.national"),
+    LONG_DISTANCE_TRAVEL(TraewellingTravelType.LONG_DISTANCE_TRAVEL, "traewelling.travel_type.express"),
     REGIONAL_EXPRESS(TraewellingTravelType.REGIONAL_EXPRESS, "traewelling.travel_type.regional_express"),
     REGIONAL(TraewellingTravelType.REGIONAL, "traewelling.travel_type.regional"),
     SUBURBAN(TraewellingTravelType.SUBURBAN, "traewelling.travel_type.suburban"),
