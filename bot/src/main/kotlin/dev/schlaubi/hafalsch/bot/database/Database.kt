@@ -26,9 +26,11 @@ suspend fun CoroutineCollection<CheckIn>.findForJourney(user: Snowflake, journey
     and(CheckIn::journeyId eq journeyId, CheckIn::user eq user)
 )
 
-suspend fun CoroutineCollection<CheckIn>.findForJournies(journeyIds: List<String>) = find(
-    and(CheckIn::journeyId `in` journeyIds)
-).toList()
+suspend fun CoroutineCollection<CheckIn>.findForJournies(journeyIds: List<String>) =
+    find(CheckIn::journeyId `in` journeyIds).toList()
+
+suspend fun CoroutineCollection<CheckIn>.deleteNotActive(user: Snowflake, journeyIds: List<String>) =
+    find(and(CheckIn::user eq user, not(CheckIn::journeyId `in` journeyIds))).toList()
 
 @Serializable
 data class TraevellingUserLogin(

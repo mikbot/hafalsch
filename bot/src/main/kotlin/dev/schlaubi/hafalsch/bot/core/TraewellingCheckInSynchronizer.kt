@@ -1,15 +1,11 @@
 package dev.schlaubi.hafalsch.bot.core
 
-import dev.kord.common.entity.Snowflake
-import dev.schlaubi.hafalsch.bot.database.CheckIn
-import dev.schlaubi.hafalsch.bot.database.Database
-import dev.schlaubi.hafalsch.bot.database.TraevellingUserLogin
-import dev.schlaubi.hafalsch.bot.database.findForJournies
+import dev.schlaubi.hafalsch.bot.database.*
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.traewelling.Traewelling
-import dev.schlaubi.hafalsch.traewelling.entity.Status
 import dev.schlaubi.stdx.coroutines.parallelMap
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.koin.core.component.inject
@@ -50,9 +46,14 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
             }.map {
                 user to it
             }
+        }.toMap()
+
+        knownCheckins.forEach { (user, userCheckIns) ->
+            val allUserCheckIns = userCheckIns + (knownCheckins[user] ?: emptyList())
+            Database.checkIns.deleteNotActive(user, allUserCheckIns)
         }
 
-        LOG.debug { "Found the following check-ins to be new: ${newCheckIns.map(Pair<Snowflake, Status>::second)}" }
+        LOG.debug { "Found the following check-ins to be new: ${newCheckIns.values}" }
 
         val dbCheckIns = newCheckIns.mapNotNull { (user, trip) ->
             val start = trip.trainCheckin.origin.ibnr?.toString() ?: return@mapNotNull null

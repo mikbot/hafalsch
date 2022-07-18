@@ -7,6 +7,10 @@ import com.kotlindiscord.kord.extensions.types.respond
 import dev.schlaubi.hafalsch.bot.command.traewelling.status
 import dev.schlaubi.hafalsch.bot.command.traewelling.withToken
 import dev.schlaubi.hafalsch.bot.core.HafalschModule
+import dev.schlaubi.hafalsch.bot.database.CheckIn
+import dev.schlaubi.hafalsch.bot.database.Database
+import org.litote.kmongo.and
+import org.litote.kmongo.eq
 
 class CheckOutArguments : Arguments() {
     val status by status {
@@ -23,6 +27,12 @@ context(HafalschModule)
     action {
         withToken {
             traewelling.statuses.delete(arguments.status.id, token)
+            Database.checkIns.deleteOne(
+                and(
+                    CheckIn::journeyId eq arguments.status.trainCheckin.tripId,
+                    CheckIn::user eq user.id
+                )
+            )
 
             respond {
                 content = translate("commands.traewelling.check_out.success", arrayOf(arguments.status.id))
