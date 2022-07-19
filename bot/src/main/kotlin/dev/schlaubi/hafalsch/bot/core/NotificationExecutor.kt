@@ -14,6 +14,7 @@ import dev.schlaubi.hafalsch.bot.ui.*
 import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.marudor.Marudor
+import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import kotlinx.coroutines.coroutineScope
@@ -160,7 +161,8 @@ private suspend fun UIContext.sendStatus(
                     Color.GREEN.kColor
                 }
 
-                val relevantMessages = stop.irisMessages.filterRelevant()
+                val relevantMessages = stop.irisMessages
+                    .filter { it.type == IrisMessage.Type.SERVICE_MESSAGE }
 
                 if (relevantMessages.isNotEmpty()) {
                     field {
@@ -188,12 +190,13 @@ private suspend fun UIContext.sendStatus(
 
         val newMessages = currentStatus.currentStop?.irisMessages
                 ?.filter { it !in (previousStatus?.messages ?: emptyList()) }
+                ?.filterRelevant()
                 ?: emptyList()
 
         if (newMessages.isNotEmpty()) {
             embed {
                 title = translate("notification.new_messages", newMessages.size, currentStatus.train.name)
-                description = newMessages.filterRelevant().format()
+                description = newMessages.format()
                 color = Color.RED.kColor
             }
         }
