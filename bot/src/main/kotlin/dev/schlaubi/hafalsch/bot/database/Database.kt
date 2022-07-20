@@ -30,7 +30,7 @@ suspend fun CoroutineCollection<CheckIn>.findForJournies(journeyIds: List<String
     find(CheckIn::journeyId `in` journeyIds).toList()
 
 suspend fun CoroutineCollection<CheckIn>.deleteNotActive(user: Snowflake, journeyIds: List<String>) =
-    find(and(CheckIn::user eq user, not(CheckIn::journeyId `in` journeyIds))).toList()
+    deleteMany(and(CheckIn::user eq user, not(CheckIn::journeyId `in` journeyIds)))
 
 @Serializable
 data class TraevellingUserLogin(
@@ -50,9 +50,6 @@ data class CheckIn(
     val start: String,
     val end: String
 )
-
-@Serializable
-data class JourneyIdentifier(val trainName: String, val initialDeparture: Instant)
 
 @Serializable
 data class JourneyState(

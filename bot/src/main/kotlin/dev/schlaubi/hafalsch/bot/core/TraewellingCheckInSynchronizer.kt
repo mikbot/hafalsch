@@ -48,9 +48,8 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
             }
         }.toMap()
 
-        knownCheckins.forEach { (user, userCheckIns) ->
-            val allUserCheckIns = userCheckIns + (knownCheckins[user] ?: emptyList())
-            Database.checkIns.deleteNotActive(user, allUserCheckIns)
+        checkIns.forEach { (user, checkIns) ->
+            Database.checkIns.deleteNotActive(user, checkIns.map { it.trainCheckin.tripId })
         }
 
         LOG.debug { "Found the following check-ins to be new: ${newCheckIns.values}" }

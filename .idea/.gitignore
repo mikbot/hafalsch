@@ -6,5 +6,6 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+dataSources.xml
 # Artifacts
 /artifacts/
