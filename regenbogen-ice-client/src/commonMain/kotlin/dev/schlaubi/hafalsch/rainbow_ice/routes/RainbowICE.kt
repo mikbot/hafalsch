@@ -33,21 +33,21 @@ public class RainbowICE {
      * **This only includes long distance travel stations**
      */
     @Serializable
-    @Resource("stationSearch/{query}")
+    @Resource("v1/station_search/{query}")
     public data class StationSearch(val query: String, val rainbowICE: RainbowICE = RainbowICE())
 
     /**
      * Provides train autocomplete for [query] (TZn and name).
      */
     @Serializable
-    @Resource("autocomplete/{query}")
+    @Resource("v1/autocomplete/{query}")
     public data class Autocomplete(val query: String, val rainbowICE: RainbowICE = RainbowICE())
 
     /**
      * Meta-class for `/train_vehicle` route.
      */
     @Serializable
-    @Resource("train_vehicle")
+    @Resource("v1/train_vehicle")
     public data class TrainVehicle(val rainbowICE: RainbowICE = RainbowICE()) {
         /**
          * Fetches [train information][TrainVehicleEntity] for [query].
