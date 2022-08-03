@@ -9,6 +9,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.statement.*
 import dev.schlaubi.hafalsch.rainbow_ice.routes.RainbowICE as RainbowICERoute
+import dev.schlaubi.hafalsch.rainbow_ice.routes.APIRoute
 
 /**
  * Mapper of the [regenbogen-ice.de](regenbogen-ice.de) API.
@@ -21,7 +22,7 @@ public class RainbowICE(private val resources: ClientResources) {
      * Provides autocomplete for [query].
      */
     public suspend fun autocomplete(query: String): List<String> =
-        resources.client.get(RainbowICERoute.Autocomplete(query)).body()
+        resources.client.get(APIRoute.Autocomplete(query)).body()
 
     /**
      * Validates whether [query] is a valid TZn.
@@ -43,7 +44,7 @@ public class RainbowICE(private val resources: ClientResources) {
         includeRoutes: Boolean? = null,
         includeMarudorLink: Boolean? = null
     ): TrainVehicle? =
-        resources.client.get(RainbowICERoute.TrainVehicle.Specific(query, tripLimit, includeRoutes, includeMarudorLink))
+        resources.client.get(APIRoute.TrainVehicle.Specific(query, tripLimit, includeRoutes, includeMarudorLink))
             .safeBody()
 
     /**
@@ -52,7 +53,7 @@ public class RainbowICE(private val resources: ClientResources) {
      * **This only includes long distance travel stations**
      */
     public suspend fun stationSearch(query: String): List<Station> =
-        resources.client.get(RainbowICERoute.StationSearch(query)).body()
+        resources.client.get(APIRoute.StationSearch(query)).body()
 
     /**
      *  Returns an RSS feed for the `Regenbogen ICE`.

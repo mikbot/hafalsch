@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Mapping of [Regenbogen ICE API](https://github.com/regenbogen-ice/api).
+ * Mapping of [Regenbogen ICE API](https://github.com/regenbogen-ice/api) / route.
  */
 @Resource("")
 @Serializable
@@ -25,45 +25,5 @@ public class RainbowICE {
         @Serializable
         @Resource("{station}")
         public data class ForStation(val station: String, val rss: Rss = Rss())
-    }
-
-    /**
-     * Provides station autocomplete for [query].
-     *
-     * **This only includes long distance travel stations**
-     */
-    @Serializable
-    @Resource("v1/station_search/{query}")
-    public data class StationSearch(val query: String, val rainbowICE: RainbowICE = RainbowICE())
-
-    /**
-     * Provides train autocomplete for [query] (TZn and name).
-     */
-    @Serializable
-    @Resource("v1/autocomplete/{query}")
-    public data class Autocomplete(val query: String, val rainbowICE: RainbowICE = RainbowICE())
-
-    /**
-     * Meta-class for `/train_vehicle` route.
-     */
-    @Serializable
-    @Resource("v1/train_vehicle")
-    public data class TrainVehicle(val rainbowICE: RainbowICE = RainbowICE()) {
-        /**
-         * Fetches [train information][TrainVehicleEntity] for [query].
-         *
-         * @property tripLimit How many [trips][TrainVehicleEntity.trips] to fetch
-         * @property includeRoutes whether to include [TrainVehicleEntity.trips]
-         * @property includeMarudorLink whether to include [TrainVehicleEntity.Trip.marudor]
-         */
-        @Serializable
-        @Resource("")
-        public data class Specific(
-            @SerialName("q") val query: String,
-            @SerialName("trip_limit") val tripLimit: Int? = null,
-            @SerialName("include_routes") val includeRoutes: Boolean? = null,
-            @SerialName("include_marudor_link") val includeMarudorLink: Boolean? = null,
-            val trainVehicle: TrainVehicle = TrainVehicle()
-        )
     }
 }
