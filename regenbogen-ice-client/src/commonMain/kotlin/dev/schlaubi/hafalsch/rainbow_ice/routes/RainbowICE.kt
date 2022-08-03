@@ -1,6 +1,5 @@
 package dev.schlaubi.hafalsch.rainbow_ice.routes
 
-import dev.schlaubi.hafalsch.rainbow_ice.annotations.ExperimentalRainbowICEApi
 import dev.schlaubi.hafalsch.rainbow_ice.entity.TrainVehicle as TrainVehicleEntity
 import io.ktor.resources.*
 import kotlinx.serialization.SerialName
@@ -34,21 +33,21 @@ public class RainbowICE {
      * **This only includes long distance travel stations**
      */
     @Serializable
-    @Resource("stationSearch/{query}")
+    @Resource("v1/station_search/{query}")
     public data class StationSearch(val query: String, val rainbowICE: RainbowICE = RainbowICE())
 
     /**
      * Provides train autocomplete for [query] (TZn and name).
      */
     @Serializable
-    @Resource("autocomplete/{query}")
+    @Resource("v1/autocomplete/{query}")
     public data class Autocomplete(val query: String, val rainbowICE: RainbowICE = RainbowICE())
 
     /**
      * Meta-class for `/train_vehicle` route.
      */
     @Serializable
-    @Resource("train_vehicle")
+    @Resource("v1/train_vehicle")
     public data class TrainVehicle(val rainbowICE: RainbowICE = RainbowICE()) {
         /**
          * Fetches [train information][TrainVehicleEntity] for [query].
@@ -66,19 +65,5 @@ public class RainbowICE {
             @SerialName("include_marudor_link") val includeMarudorLink: Boolean? = null,
             val trainVehicle: TrainVehicle = TrainVehicle()
         )
-
-
-        /**
-         * Probably retrieves all trains.
-         *
-         * **This api exists in the code, however does not exist on the production instance**
-         *
-         * https://github.com/regenbogen-ice/api/blob/canary/src/webserver/paths/train_vehicle.ts#L124-L132 exists
-         * however https://regenbogen-ice.de/api/train_vehicle/all returns 404
-         */
-        @ExperimentalRainbowICEApi
-        @Serializable
-        @Resource("all")
-        public data class All(val trainVehicle: TrainVehicle = TrainVehicle())
     }
 }
