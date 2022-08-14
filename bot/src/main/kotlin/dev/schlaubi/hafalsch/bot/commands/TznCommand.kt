@@ -14,9 +14,12 @@ import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.bot.util.journeyAutoComplete
 import dev.schlaubi.hafalsch.marudor.entity.CoachSequence
+import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
+import dev.schlaubi.hafalsch.marudor.entity.Stop
 import dev.schlaubi.hafalsch.rainbow_ice.entity.TrainVehicle
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.stdx.core.isNotNullOrBlank
+import dev.schlaubi.stdx.coroutines.suspendLazy
 import kotlinx.datetime.Instant
 
 class TznJidArguments : Arguments() {
@@ -47,14 +50,7 @@ suspend fun HafalschModule.tznCommand() = publicSlashCommand {
 
         action {
             val details = marudor.detailsByJourneyId(arguments.jid) ?: noData()
-            val number = details.train.number?.toIntOrNull() ?: noData()
-            val sequence = marudor.coachSequence.coachSequence(
-                number,
-                details.departure.time,
-                initialDeparture = details.stops.first().departure?.time
-            )
-
-            tznCommand(sequence, details.stops.first().departure?.time ?: details.departure.time)
+            tznCommand(details)
         }
 
     }
@@ -66,23 +62,59 @@ suspend fun HafalschModule.tznCommand() = publicSlashCommand {
         action {
             val journey =
                 runCatching { marudor.hafas.journeyMatch(arguments.name).firstOrNull() }.getOrNull() ?: noData()
-            val number = journey.train.number?.toIntOrNull() ?: noData()
-            val departure = journey.firstStop.departure?.time ?: noData()
-            val sequence = marudor.coachSequence.coachSequence(
-                number, departure, initialDeparture = departure
-            )
+            val details = marudor.hafas.details(
+                journey.train.name,
+                journey.firstStop.station.id,
+                journey.firstStop.departure?.time
+            ) ?: noData()
 
-            tznCommand(sequence, departure)
+            tznCommand(details)
         }
     }
 }
 
-context(HafalschModule)
-        suspend fun PublicSlashCommandContext<*>.tznCommand(coachSequence: CoachSequence?, initialDeparture: Instant) {
-    if (coachSequence == null || !coachSequence.isRealtime || coachSequence.sequence.groups.isEmpty()) {
-        noData()
+context (HafalschModule)
+        private suspend fun JourneyInformation.findMostUpToDateInformation(
+    trainNumber: Int,
+    initialDeparture: Instant
+): CoachSequence? {
+    suspend fun tryFetch(stop: Stop?): CoachSequence? {
+        if (stop == null) return null
+        val departure = stop.departure?.scheduledTime
+        if (departure != null) {
+            return marudor.coachSequence.coachSequence(trainNumber, departure, stop.station.id, initialDeparture)
+                .takeIf(CoachSequence?::isValid)
+        }
+        return null
     }
 
+    suspend fun List<Stop>.findFirstMatch() = map {
+        suspendLazy { tryFetch(it) }
+    }.firstOrNull { it().isValid() }?.get()
+
+
+    // First try to fetch the current stop
+    val firstTry = currentStop ?: return null
+
+
+    return tryFetch(firstTry) ?: run {
+        // Then try to find the closest stop to the current stop with real time data
+        val remainingStations = stops.subList(0, stops.indexOf(firstTry)).reversed()
+        remainingStations.findFirstMatch()
+    }
+    ?: run {
+        // then just find the first stop with a real-time departure
+        val remainingStations = stops.subList(stops.indexOf(firstTry), stops.size)
+        remainingStations.findFirstMatch()
+    }
+}
+
+
+context(HafalschModule)
+        suspend fun PublicSlashCommandContext<*>.tznCommand(details: JourneyInformation) {
+    val trainNumber = details.train.number?.toIntOrNull() ?: noData()
+    val initialDeparture = details.stops.firstOrNull()?.departure?.scheduledTime ?: noData()
+    val coachSequence = details.findMostUpToDateInformation(trainNumber, initialDeparture) ?: noData()
     val type = coachSequence.product.type
 
     val embeds = buildList {
@@ -118,6 +150,7 @@ context(HafalschModule)
                         "commands.tzn.maybe",
                         arrayOf(probableTzn, tznJourney?.trips?.firstOrNull()?.name)
                     )
+
                     else -> translate("commands.tzn.definitely", arrayOf(probableTzn))
                 }
 
@@ -139,9 +172,15 @@ context(HafalschModule)
     }
 
     respond {
+        content = translate(
+            "commands.tzn.different_station",
+            arrayOf(coachSequence.stop.stopPlace.name)
+        ).takeIf { coachSequence.stop.stopPlace.evaNumber != details.currentStop?.station?.id }
         this.embeds.addAll(embeds)
     }
 }
+
+private fun CoachSequence?.isValid() = this != null && isRealtime && sequence.groups.isNotEmpty()
 
 private val TrainVehicle.Trip.name: String
     get() = "$trainType $trainNumber"

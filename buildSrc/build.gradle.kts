@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     groovy
     `kotlin-dsl`
-    kotlin("jvm") version "1.7.0"
+    kotlin("jvm") version "1.7.10"
 }
 
 repositories {
@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
+    implementation(kotlin("serialization"))
     implementation("org.jetbrains.dokka", "dokka-gradle-plugin", "1.7.0")
     implementation(gradleApi())
     implementation(localGroovy())
