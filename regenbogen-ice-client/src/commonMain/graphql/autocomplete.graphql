@@ -1,0 +1,2 @@
+query AutoComplete($query: String!){autocomplete(q: $query){guess,type,train_type}}
+query MatchTrain($query: String!){autocomplete(q: $query){guess}}

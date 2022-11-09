@@ -16,7 +16,7 @@ import dev.schlaubi.hafalsch.bot.util.journeyAutoComplete
 import dev.schlaubi.hafalsch.marudor.entity.CoachSequence
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
 import dev.schlaubi.hafalsch.marudor.entity.Stop
-import dev.schlaubi.hafalsch.rainbow_ice.entity.TrainVehicle
+import dev.schlaubi.hafalsch.rainbow_ice.FetchTrainQuery
 import dev.schlaubi.mikbot.plugin.api.util.discordError
 import dev.schlaubi.stdx.core.isNotNullOrBlank
 import dev.schlaubi.stdx.coroutines.suspendLazy
@@ -138,11 +138,11 @@ context(HafalschModule)
 
                 val probableTzn = name.replace(type, "").trim().trimStart('0')
                 val tznExists = rainbowICE.matchTrain(probableTzn)
-                val tznJourney = rainbowICE.fetchTrain(probableTzn, 5, true)
-                val probableJourney = tznJourney?.trips?.firstOrNull { journey ->
-                    journey.trainNumber.toString() == number
+                val tznJourney = rainbowICE.fetchTrain(probableTzn, 1)
+                val probableJourney = tznJourney?.trips?.firstOrNull { (trainNumber) ->
+                    trainNumber == number
                 }
-                val journeyMatches = probableJourney?.stops?.firstOrNull()?.scheduledDeparture == initialDeparture
+                val journeyMatches = probableJourney?.stops?.firstOrNull()?.scheduled_departure == initialDeparture
 
                 description = when {
                     !tznExists -> translate("commands.tzn.probably_not", arrayOf(probableTzn))
@@ -182,5 +182,5 @@ context(HafalschModule)
 
 private fun CoachSequence?.isValid() = this != null && isRealtime && sequence.groups.isNotEmpty()
 
-private val TrainVehicle.Trip.name: String
-    get() = "$trainType $trainNumber"
+private val FetchTrainQuery.Trip.name: String
+    get() = "$train_type $train_number"

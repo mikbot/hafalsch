@@ -1,0 +1,10 @@
+# Write your query or mutation here
+query FetchTrain($q: String!, $limit: Int){
+    train_vehicle(q: $q) {
+        trips(limit: $limit) {
+            train_type
+            train_number
+            stops {scheduled_departure},
+        }
+    }
+}

@@ -1,0 +1,66 @@
+scalar EvaNumber # response type: string (The station name)
+scalar DateTime # response type: string (ISO-FORMAT DateTime)
+scalar List # ',' seperated string values
+
+type Autocomplete {
+    guess: String! # this means the autocompleted guess like "München"
+    type: String! # the type of the guess: train_vehicle, train_trip or guess
+    train_type: String! # the type of the train, e.g. ICE or IC
+}
+
+type TrainStop {
+    cancelled: Boolean!
+    station: EvaNumber!
+    # scheduled_departure & departure OR/AND scheduled_arrival & arrival will be not null
+    scheduled_departure: DateTime
+    departure: DateTime
+    scheduled_arrival: DateTime
+    arrival: DateTime
+}
+
+type TrainTrip {
+    train_number: String!
+    train_type: String!
+    origin_station: EvaNumber
+    destination_station: EvaNumber
+    initial_departure: DateTime! # The scheduled departure at the first stop: The combination of number, type and initial_departure is unique
+    bahn_expert: String # A generated link to https://bahn.expert
+    stops: [TrainStop]
+    train_vehicles: [TrainVehicle] # the train vehicles that will be driven on this trip (list because a trip can be driven by 2 ICE's)
+}
+
+type CoachSequence {
+    timestamp: DateTime! # timestamp at which the coach sequence was found
+    coaches: [Coach]!
+    train_vehicle: TrainVehicle! # the assigned train_vehicle of the coach_sequence
+}
+
+type Coach {
+    index: Int! # index or (length - index - 1) (the first coach of a 10 coaches long coach_sequence has the index 0 or 9)
+    class: Int! # first, second or third class (third class means LOK i think)
+    type: String! # e.g. Bpmz
+    uic: String! # there are unique uic numbers for every coach
+    category: String! # e.g. STEUERWAGENERSTEKLASSE
+    coach_sequence: CoachSequence!
+}
+
+type TrainVehicle {
+    building_series: String # e.g. 401
+    building_series_name: String # e.g. ICE 1 Modernisiert (BR401)
+    train_vehicle_name: String
+    train_vehicle_number: Int!
+    train_type(get_raw_type: Boolean): String! # e.g. ICE or IC ; get_raw_type=true means the type will not be IC but ICD or ICK
+    timestamp: DateTime! # the timestamp at which the train vehicle was found
+    trips(limit: Int, ignore_finished_trips: Boolean, min_trips: Int): [TrainTrip!]! # min_trips is relevant if you are using ignore_finished_trips to set the minimum of returned trips (also finished trips)
+    coach_sequences(limit: Int): [CoachSequence] # there are multiple coach_sequences (the first one is the current and the other ones are the old), use limit 1 (default value) to get only the current
+}
+
+type Query {
+    # q could be the vehicle number or name, train_type is ICE by default
+    train_vehicle(q: String!, train_type: String): TrainVehicle
+    # get the train trips by a number & train_type (ICE by default), use limit=1 to get the current train trip (today)
+    train_trip(train_number: Int!, train_type: String, limit: Int, initial_departure: DateTime): [TrainTrip]
+    coach(uic: String!, limit: Int): [Coach]!
+    # autcomplete train vehicles, train trips and coach uic numbers, you can configure the search types (train_trip,train_vehicle,coach)
+    autocomplete(q: String!, types: List): [Autocomplete!]!
+}
