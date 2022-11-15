@@ -46,7 +46,9 @@ data class CheckIn(
     val user: Snowflake,
     val journeyId: String,
     val start: String,
-    val end: String
+    val end: String,
+    // Delay of last notification, not real time delay
+    val delays: Map<String, Int> // Map<EVA, DELAY>
 )
 
 @Serializable
