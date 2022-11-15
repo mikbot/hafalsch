@@ -111,7 +111,6 @@ public data class Departure(
     val productClass: String? = null,
     val rawId: String,
     val ref: Ref? = null,
-    val reihung: Boolean,
     val route: List<Stop>,
     val scheduledDestination: String,
     val scheduledPlatform: String? = null,
