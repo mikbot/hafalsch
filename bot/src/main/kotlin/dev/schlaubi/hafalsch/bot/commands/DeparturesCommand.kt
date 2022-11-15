@@ -165,7 +165,7 @@ private suspend fun UIContext.departures(station: Station, lookahead: Int?, look
                     val journey = orderedDepartures[it.currentPageNum].second[index]
 
                     asUIContext {
-                        journey(JourneyData(journey.train.name, station, journey.initialDeparture, null), true)
+                        journey(JourneyData("${journey.train.type} ${journey.train.number}", station, journey.initialDeparture, null), true)
                     }
                 }
             }
