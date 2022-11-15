@@ -5,13 +5,11 @@ import dev.schlaubi.hafalsch.client.ClientResources
 import dev.schlaubi.hafalsch.client.util.safeBody
 import dev.schlaubi.hafalsch.traewelling.entity.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.datetime.Instant
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
 import dev.schlaubi.hafalsch.traewelling.entity.User as UserEntity
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling as TraewellingRoute
 import dev.schlaubi.hafalsch.traewelling.routes.Traewelling.Statuses as StatusesRoute
@@ -23,59 +21,41 @@ public class Traewelling internal constructor(private val resources: ClientResou
     public val statuses: Statuses = Statuses()
     public val user: User = User()
 
-    /**
-     * Retrieves the user for [token].
-     */
-    public suspend fun getUser(token: String): UserEntity =
-        resources.client.get(TraewellingRoute.Getuser()) {
-            authenticate(token)
-        }.body()
-
     public inner class User {
         /**
-         * Lists all active statuses for a [username] by [token].
+         * Lists all active statuses for [token].
          */
-        public suspend fun listEnroute(username: String, token: String): List<Status> {
-            val response = resources.client.get(TraewellingRoute.User.Specific.Active(username)) {
+        public suspend fun listEnroute(token: String): Data<Status>? {
+            return resources.client.get(TraewellingRoute.User.Statuses.Active()) {
+                expectSuccess = false
                 authenticate(token)
-            }.body<JsonElement>().jsonObject
-
-            // Träwelling sometimes returns different respones here
-
-            return if (response.isEmpty()) {
-                emptyList()
-            } else if (response["statuses"] != null) {
-                resources.json.decodeFromJsonElement<UserStatusesList>(response).statuses.data
-            } else {
-                listOf(resources.json.decodeFromJsonElement(response))
-            }
+            }.safeBody()
         }
     }
 
     public inner class Auth {
+        /**
+         * Retrieves the user for [token].
+         */
+        public suspend fun getUser(token: String): Data<UserEntity> =
+            resources.client.get(TraewellingRoute.Auth.User()) {
+                authenticate(token)
+            }.body()
 
         /**
          * Retrieves a [TokenResponse] for [email] and [password].
          */
-        public suspend fun login(email: String, password: String): TokenResponse? =
+        public suspend fun login(email: String, password: String): Data<TokenResponse>? =
             resources.client.post(TraewellingRoute.Auth.Login()) {
+                expectSuccess = false
                 contentType(ContentType.Application.Json)
                 setBody(LoginRequest(email, password))
             }.safeBody()
 
         /**
-         * Creates a new user from [request].
-         */
-        public suspend fun signUp(request: SignUpRequest): SignUpResponse? =
-            resources.client.post(TraewellingRoute.Auth.Signup()) {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.safeBody()
-
-        /**
          * Destroys [token].
          */
-        public suspend fun logout(token: String): LogoutResponse? = resources.client.post {
+        public suspend fun logout(token: String): Unit? = resources.client.post(TraewellingRoute.Auth.Logout()) {
             authenticate(token)
         }.safeBody()
     }

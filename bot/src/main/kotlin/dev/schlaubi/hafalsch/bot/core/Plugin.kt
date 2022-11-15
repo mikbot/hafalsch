@@ -49,11 +49,10 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
     private val marudor = Marudor {
         httpClient = baseClient
     }
-    private val rainbowICE = RainbowICE {
-        httpClient = baseClient
-    }
+    private val rainbowICE = RainbowICE()
+
     private val traewelling = Traewelling {
-        url(Config.TRÄWELLING_API)
+        url(Config.TRAEWELLING_API)
         httpClient = baseClient.config {
             expectSuccess = true
             HttpResponseValidator {
@@ -65,7 +64,6 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
                     val body = exceptionResponse.bodyAsText()
                     val message =
                         runCatching { Json.decodeFromString<TraewellingError>(body).error }.getOrElse { body }
-
                     discordError(message)
                 }
             }

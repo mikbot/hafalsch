@@ -18,18 +18,17 @@ public data class UserStatusesList(
 @Serializable
 public data class Status(
     val id: Int,
-    @SerialName("created_at")
+    val body: String,
+    val user: Int,
+    val username: String,
+    val profilePicture: String?,
+    val preventIndex: Boolean,
+    val business: Int,
+    val visibility: Int,
+    val likes: Int,
+    val liked: Boolean,
     val createdAt: Instant,
-    @SerialName("updated_at")
-    val updatedAt: Instant,
-    val body: String?,
-    val type: String,
-    @SerialName("event_id")
-    val eventId: Int?,
-    val favorited: Boolean,
-    val user: User,
-    @SerialName("train_checkin")
-    val trainCheckin: CheckIn,
+    val train: Train,
     val event: Event?
 )
 

@@ -70,10 +70,10 @@ context(HafalschModule)
                 val email = event.interaction.textInputs[loginModalEmail]?.value ?: return@action
                 val password = event.interaction.textInputs[loginModalPassword]?.value ?: return@action
 
-                val token = traewelling.auth.login(email, password)
+                val token = traewelling.auth.login(email, password)?.data
 
                 if (token != null) {
-                    val user = traewelling.getUser(token.token)
+                    val user = traewelling.auth.getUser(token.token).data
 
                     Database.traewellingLogins.save(
                         TraevellingUserLogin(

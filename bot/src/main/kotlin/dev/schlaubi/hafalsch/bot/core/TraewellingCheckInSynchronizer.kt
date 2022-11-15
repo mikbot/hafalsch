@@ -3,7 +3,7 @@ package dev.schlaubi.hafalsch.bot.core
 import dev.schlaubi.hafalsch.bot.database.*
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.traewelling.Traewelling
-import dev.schlaubi.stdx.coroutines.parallelMap
+import dev.schlaubi.stdx.coroutines.parallelMapNotNull
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -25,41 +25,39 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
         LOG.debug { "Importing Träwelling check ins" }
         val checkIns = Database.traewellingLogins.find(TraevellingUserLogin::expiresAt gte Clock.System.now())
             .toList()
-            .parallelMap {
-                val user = traewelling.getUser(it.token)
-                it.id to traewelling.user.listEnroute(user.username, it.token)
+            .parallelMapNotNull {
+                val status =traewelling.user.listEnroute(it.token)?.data
+                status?.let { safeStatus ->
+                    it.id to safeStatus
+                }
             }
             .toMap()
-        LOG.debug { "Found the following check-ins from Träwelling: ${checkIns.values}" }
+        LOG.debug { "Found the following check-ins from Towelling: ${checkIns.values}" }
 
-        val knownIds = checkIns.flatMap { (_, status) ->
-            status.map { it.trainCheckin.tripId }
+        val knownIds = checkIns.mapNotNull { (_, status) ->
+            status.train.hafasId
         }
 
         val knownCheckins = Database.checkIns.findForJournies(knownIds)
             .groupBy(CheckIn::user)
             .mapValues { (_, value) -> value.map(CheckIn::journeyId) }
 
-        val newCheckIns = checkIns.flatMap { (user, trips) ->
-            trips.filter {
-                it.trainCheckin.tripId !in (knownCheckins[user] ?: emptyList())
-            }.map {
-                user to it
-            }
-        }.toMap()
+        val newCheckIns = checkIns.filter { (user, checkin) ->
+            checkin.train.hafasId !in (knownCheckins[user] ?: emptyList())
+        }
 
-        checkIns.forEach { (user, checkIns) ->
-            Database.checkIns.deleteNotActive(user, checkIns.map { it.trainCheckin.tripId })
+        checkIns.forEach { (user, checkIn) ->
+            Database.checkIns.deleteNotActive(user, checkIn.train.hafasId)
         }
 
         LOG.debug { "Found the following check-ins to be new: ${newCheckIns.values}" }
 
         val dbCheckIns = newCheckIns.mapNotNull { (user, trip) ->
-            val start = trip.trainCheckin.origin.ibnr?.toString() ?: return@mapNotNull null
-            val end = trip.trainCheckin.destination.ibnr?.toString() ?: return@mapNotNull null
+            val start = trip.train.origin.evaIdentifier.toString()
+            val end = trip.train.destination.evaIdentifier.toString()
             CheckIn(
                 user = user,
-                journeyId = trip.trainCheckin.tripId,
+                journeyId = trip.train.hafasId,
                 start = start,
                 end = end
             )

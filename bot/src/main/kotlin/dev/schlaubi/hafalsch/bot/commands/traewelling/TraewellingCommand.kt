@@ -9,7 +9,4 @@ suspend fun HafalschModule.traewellingCommand() = publicSlashCommand {
 
     loginCommand()
     logoutCommand()
-    simpleCheckInCommand()
-    extendedCheckInCommand()
-    checkOutCommand()
 }

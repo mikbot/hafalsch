@@ -2,6 +2,7 @@ package dev.schlaubi.hafalsch.bot.database
 
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
+import dev.schlaubi.hafalsch.bot.util.DateSerializer
 import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
 import dev.schlaubi.mikbot.plugin.api.io.getCollection
 import dev.schlaubi.mikbot.plugin.api.util.database
@@ -22,21 +23,18 @@ object Database : KordExKoinComponent {
 suspend fun CoroutineCollection<SubscribtionSettings>.findOneByIdSafe(user: Snowflake) =
     findOneById(user) ?: SubscribtionSettings(user)
 
-suspend fun CoroutineCollection<CheckIn>.findForJourney(user: Snowflake, journeyId: String) = findOne(
-    and(CheckIn::journeyId eq journeyId, CheckIn::user eq user)
-)
-
 suspend fun CoroutineCollection<CheckIn>.findForJournies(journeyIds: List<String>) =
     find(CheckIn::journeyId `in` journeyIds).toList()
 
-suspend fun CoroutineCollection<CheckIn>.deleteNotActive(user: Snowflake, journeyIds: List<String>) =
-    deleteMany(and(CheckIn::user eq user, not(CheckIn::journeyId `in` journeyIds)))
+suspend fun CoroutineCollection<CheckIn>.deleteNotActive(user: Snowflake, journeyId: String) =
+    deleteMany(and(CheckIn::user eq user, not(CheckIn::journeyId eq journeyId)))
 
 @Serializable
 data class TraevellingUserLogin(
     @SerialName("_id")
     val id: Snowflake,
     val token: String,
+    @Serializable(with = DateSerializer::class)
     val expiresAt: Instant,
     val userId: Int
 )

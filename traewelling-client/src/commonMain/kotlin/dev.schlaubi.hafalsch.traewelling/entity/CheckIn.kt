@@ -4,15 +4,13 @@ import dev.schlaubi.hafalsch.client.util.UnixTimestamp
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 @Serializable
 public data class CheckInRequest(
     @SerialName("tripID")
     val tripId: String,
     val lineName: String,
-    val start : String,
+    val start: String,
     val destination: String,
     val body: String? = null,
     val tweet: Boolean,
@@ -34,10 +32,11 @@ public data class CheckInResponse(
 @Serializable
 public data class Station(
     val id: Int,
-    val rilIdentifier: String? = null,
     val name: String,
-    val provider: String? = null,
-    val ibnr: Int?=0
+    val latitude: Double,
+    val longitude: Double,
+    val rilIdentifier: String? = null,
+    val ibnr: Int? = 0
 )
 
 @Serializable
@@ -65,26 +64,41 @@ public data class MinimalStopOver(val stop: Stop) {
 
 @Serializable
 public data class Train(
-    val id: Int,
-    @SerialName("trip_id")
-    val tripId: String,
+    val trip: Int,
+    val hafasId: String,
     val category: String,
     val number: String,
-    val linename: String,
-    val origin: Int,
-    val destination: Int,
-    @SerialName("stopovers")
-    val stopOvers: String
-) {
-    val stopOversParsed: List<MinimalStopOver>
-        get() = json.decodeFromString(stopOvers)
+    val lineName: String,
+    val distance: Int,
+    val points: Int,
+    val duration: Int,
+    val speed: Double,
+    val origin: TrainStopOver,
+    val destination: TrainStopOver
+)
 
-    public companion object {
-        public val json: Json = Json {
-            ignoreUnknownKeys = true
-        }
-    }
-}
+@Serializable
+public data class TrainStopOver(
+    val id: Int,
+    val name: String,
+    val rilIdentifier: String?,
+    val evaIdentifier: Int,
+    val arrival: Instant?,
+    val arrivalPlanned: Instant,
+    val arrivalReal: Instant?,
+    val arrivalPlatformPlanned: String,
+    val arrivalPlatformReal: String?,
+    val departure: Instant?,
+    val departurePlanned: Instant,
+    val departureReal: Instant?,
+    val departurePlatformPlanned: String,
+    val departurePlatformReal: String?,
+    val platform: String,
+    val isArrivalDelayed: Boolean,
+    val isDepartureDelayed: Boolean,
+    val cancelled: Boolean
+)
+
 
 @Serializable
 public data class StopOver(

@@ -6,30 +6,31 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Resource("/api/v0")
+@Resource("/api/v1")
 public class Traewelling {
-
-    @Serializable
-    @Resource("/getuser")
-    public data class Getuser(val traewelling: Traewelling = Traewelling())
 
     @Serializable
     @Resource("user")
     public data class User(val traewelling: Traewelling = Traewelling()) {
         @Serializable
-        @Resource("{username}")
-        public data class Specific(val username: String, val user: User = User()) {
+        @Resource("statuses")
+        public data class Statuses(val user: User = User()) {
             @Serializable
             @Resource("active")
-            public data class Active(val specific: Specific) {
-                public constructor(username: String) : this(Specific(username))
-            }
+            public data class Active(val statuses: Statuses = Statuses())
         }
     }
 
     @Serializable
     @Resource("auth")
     public data class Auth(val traewelling: Traewelling = Traewelling()) {
+        /**
+         * Retrieves the current user.
+         */
+        @Serializable
+        @Resource("/user")
+        public data class User(val auth: Auth = Auth())
+
         /**
          * Log in with your user account.
          */

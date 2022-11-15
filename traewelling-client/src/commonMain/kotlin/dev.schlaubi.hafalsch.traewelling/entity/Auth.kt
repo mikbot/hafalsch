@@ -5,7 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class LoginRequest(val email: String, val password: String)
+public data class LoginRequest(val login: String, val password: String)
 
 @Serializable
 public data class TokenResponse(val token: String, @SerialName("expires_at") val expiresAt: Instant)
