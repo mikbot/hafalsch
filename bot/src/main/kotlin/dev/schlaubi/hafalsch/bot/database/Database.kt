@@ -43,12 +43,14 @@ data class TraevellingUserLogin(
 data class CheckIn(
     @SerialName("_id") @Contextual
     val id: Id<CheckIn> = newId(),
+    val traewellingId: Int,
     val user: Snowflake,
     val journeyId: String,
     val start: String,
     val end: String,
     // Delay of last notification, not real time delay
-    val delays: Map<String, Int> // Map<EVA, DELAY>
+    val delays: Map<String, Int>, // Map<EVA, DELAY>
+    val language: String?
 )
 
 @Serializable

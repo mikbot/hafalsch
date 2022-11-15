@@ -23,7 +23,18 @@ public data class IrisMessage(
     val priority: Priority? = null,
     val value: Int? = null,
     val stopPlace: HafasStation? = null
-) {
+){
+    override fun equals(other: Any?): Boolean {
+        if (other !is IrisMessage) return false
+        return other.value == value && other.stopPlace == stopPlace && other.superseded == superseded
+    }
+
+    override fun hashCode(): Int {
+        var result = superseded.hashCode()
+        result = 31 * result + (value ?: 0)
+        result = 31 * result + (stopPlace?.hashCode() ?: 0)
+        return result
+    }
 
     public val type: Type?
         get() {

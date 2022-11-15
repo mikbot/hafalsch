@@ -1,6 +1,5 @@
 package dev.schlaubi.hafalsch.bot.ui
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.commands.application.ApplicationCommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.EphemeralSlashCommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
@@ -80,7 +79,6 @@ internal class ButtonUIContext(private val buttonContext: PublicInteractionButto
 }
 
 class DataUIContext(private val locale: String?) : UIContext {
-    private val bot: ExtensibleBot by inject()
     override val kord: Kord by inject()
     override val bundle: String = dev.schlaubi.hafalsch.bot.util.bundle
     override val response: MessageInteractionResponseBehavior

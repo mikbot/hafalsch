@@ -1,7 +1,6 @@
 package dev.schlaubi.hafalsch.bot.core
 
 import com.kotlindiscord.kord.extensions.components.components
-import com.kotlindiscord.kord.extensions.components.publicButton
 import dev.kord.common.DiscordTimestampStyle
 import dev.kord.common.annotation.KordExperimental
 import dev.kord.common.annotation.KordUnsafe
@@ -10,13 +9,15 @@ import dev.kord.common.toMessageFormat
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.schlaubi.hafalsch.bot.database.*
-import dev.schlaubi.hafalsch.bot.ui.*
+import dev.schlaubi.hafalsch.bot.ui.UIContext
+import dev.schlaubi.hafalsch.bot.ui.filterRelevant
+import dev.schlaubi.hafalsch.bot.ui.format
+import dev.schlaubi.hafalsch.bot.ui.withUIContext
 import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.embed
+import dev.schlaubi.hafalsch.bot.util.showTrainInfo
 import dev.schlaubi.hafalsch.marudor.Marudor
-import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
-import dev.schlaubi.mikbot.plugin.api.util.discordError
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -99,9 +100,8 @@ private fun delayDifference(current: Int?, before: Int?): Int {
     return abs(safeCurrent - safeBefore)
 }
 
-suspend fun CheckIn.saveState(marudor: Marudor): JourneyState {
-    val currentStatus = marudor.detailsByJourneyId(journeyId) ?: discordError("Could not find journey details")
-    val state = currentStatus.toState()
+suspend fun saveState(information: JourneyInformation): JourneyState {
+    val state = information.toState()
     Database.journeyStates.save(state)
 
     return state
@@ -162,8 +162,6 @@ private suspend fun UIContext.sendStatus(
                 }
 
                 val relevantMessages = stop.irisMessages
-                    .filter { it.type == IrisMessage.Type.SERVICE_MESSAGE }
-
                 if (relevantMessages.isNotEmpty()) {
                     field {
                         name = translate("notification.delay.likely_reasons")
@@ -217,17 +215,7 @@ private suspend fun UIContext.sendStatus(
         channel.createMessage {
             this.embeds.addAll(embeds)
             components {
-                publicButton {
-                    bundle = dev.schlaubi.hafalsch.bot.util.bundle
-                    label = translate("notification.show_train_info")
-
-                    action {
-                        asUIContext {
-                            val station = currentStatus.currentStop?.station?.let { marudor.stopPlace.byEva(it.id) }
-                            journey(JourneyData(currentStatus.train.name, station, currentStatus.departure.time, null))
-                        }
-                    }
-                }
+                showTrainInfo(currentStatus)
             }
         }
     }
