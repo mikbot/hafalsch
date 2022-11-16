@@ -15,7 +15,8 @@ context(UIContext)
 fun MultiButtonPaginatorBuilder.renderStopInfo(
     journey: JourneyInformation,
     stop: Stop,
-    specialTrainEmote: String?
+    specialTrainEmote: String?,
+    additionalJourneyInformation: HafasAdditionalJourneyInformation? = null
 ) {
     parent.page {
         val journeyName = "${journey.train.name} - ${stop.station.title.replaceStationNames()}"
@@ -50,7 +51,7 @@ fun MultiButtonPaginatorBuilder.renderStopInfo(
         if (journey.train.operator != null) {
             field {
                 name = translate("journey.operator")
-                value = journey.train.operator!!.name
+                value = (additionalJourneyInformation?.operatorName ?: journey.train.operator?.name).toString()
             }
         }
 
@@ -73,7 +74,9 @@ fun MultiButtonPaginatorBuilder.renderStopInfo(
                 value = platform
             }
         }
-        val load = stop.load
+
+
+        val load = additionalJourneyInformation?.occupancy?.get(stop.station.id.toInt())
         if (load != null) {
             field {
                 name = translate("journey.load")

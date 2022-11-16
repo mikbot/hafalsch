@@ -51,7 +51,7 @@ class MultiButtonPaginator(
 
     suspend fun updatePages(pages: Pages) {
         this.myPages = pages
-        goToPage(currentPageNum)
+        goToPage(currentPageNum, true)
     }
 
     private suspend fun goToPage(page: Int, force: Boolean) {

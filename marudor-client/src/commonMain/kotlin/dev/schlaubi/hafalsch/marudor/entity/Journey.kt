@@ -25,7 +25,6 @@ public data class JourneyInformation(
     val load: Load? = null,
     val messages: List<HafasMessage> = emptyList(),
     val tarifSet: TarifSet? = null,
-    val plannedSequence: Sequence? = null,
     val type: String,
     val arrival: Stop.Date,
     val departure: Stop.Date,
@@ -69,8 +68,6 @@ public data class Stop(
     val arrival: Date? = null,
     val departure: Date? = null,
     val station: Segment,
-    @SerialName("auslastung")
-    val load: Load? = null,
     val messages: List<HafasMessage> = emptyList(),
     val additional: Boolean = false,
     val cancelled: Boolean = false,

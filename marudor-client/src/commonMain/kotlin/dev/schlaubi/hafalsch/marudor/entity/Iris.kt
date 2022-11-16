@@ -65,6 +65,16 @@ public data class IrisMessage(
     }
 }
 
+@Serializable
+public data class IrisJourney(
+    val train: Train,
+    val stops: List<Stop>,
+    val jid: String,
+    val firstStop: Stop,
+    val lastStop: Stop,
+    val messages: List<IrisMessage> = emptyList()
+)
+
 /**
  * Response of departures endpoint.
  *

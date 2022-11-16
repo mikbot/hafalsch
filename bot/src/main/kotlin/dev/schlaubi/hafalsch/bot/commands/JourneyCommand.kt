@@ -7,7 +7,6 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.schlaubi.hafalsch.bot.command.optionalDate
 import dev.schlaubi.hafalsch.bot.command.optionalStation
-import dev.schlaubi.hafalsch.bot.command.profile
 import dev.schlaubi.hafalsch.bot.ui.JourneySource
 import dev.schlaubi.hafalsch.bot.ui.asUIContext
 import dev.schlaubi.hafalsch.bot.ui.journey
@@ -30,8 +29,6 @@ class JourneyArguments : Arguments(), KordExKoinComponent, JourneySource {
         name = "date"
         description = "commands.journey.arguments.date.description"
     }
-
-    override val profile by profile()
 }
 
 suspend fun Extension.journeyCommand() = publicSlashCommand(::JourneyArguments) {

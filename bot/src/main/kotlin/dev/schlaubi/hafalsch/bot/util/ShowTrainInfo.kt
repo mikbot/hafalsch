@@ -17,7 +17,7 @@ suspend fun ComponentContainer.showTrainInfo(details: JourneyInformation) {
         action {
             asUIContext {
                 val station = details.currentStop?.station?.let { marudor.stopPlace.byEva(it.id) }
-                journey(JourneyData(details.train.name, station, details.departure.time, null))
+                journey(JourneyData(details.train.name, station, details.departure.time))
             }
         }
     }

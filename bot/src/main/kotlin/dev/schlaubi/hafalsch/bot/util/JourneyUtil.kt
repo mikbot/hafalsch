@@ -26,7 +26,7 @@ suspend fun Marudor.detailsByJourneyId(journeyId: String): JourneyInformation? {
         val (trainName, departureRaw) = url.pathSegments.drop(2)
         val departure = Instant.parse(departureRaw)
         val eva = url.parameters["stopEva"]
-        hafas.details(trainName, date = departure, station = eva)
+        journeys.details(trainName, initialDepartureDate = departure, evaNumberAlongRoute = eva)
     } else {
         null
     }
@@ -39,7 +39,7 @@ fun ConverterBuilder<String>.journeyAutoComplete() {
         val input = focusedOption.safeInput
 
         coroutineScope {
-            val results = runCatching { marudor.hafas.journeyMatch(input) }.getOrElse { emptyList() }
+            val results = runCatching { marudor.journeys.find(input) }.getOrElse { emptyList() }
 
             suggestString {
                 results.take(25).forEach {

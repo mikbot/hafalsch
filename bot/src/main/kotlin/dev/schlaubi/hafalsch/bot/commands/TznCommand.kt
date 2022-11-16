@@ -61,8 +61,8 @@ suspend fun HafalschModule.tznCommand() = publicSlashCommand {
 
         action {
             val journey =
-                runCatching { marudor.hafas.journeyMatch(arguments.name).firstOrNull() }.getOrNull() ?: noData()
-            val details = marudor.hafas.details(
+                runCatching { marudor.journeys.find(arguments.name).firstOrNull() }.getOrNull() ?: noData()
+            val details = marudor.journeys.details(
                 journey.train.name,
                 journey.firstStop.station.id,
                 journey.firstStop.departure?.time
@@ -164,7 +164,7 @@ context(HafalschModule)
                 if (specialTrainEmote.isNotNullOrBlank()) {
                     field {
                         this.name = translate("journey.is_best_train")
-                        value = specialTrainEmote!!
+                        value = specialTrainEmote
                     }
                 }
             }

@@ -84,7 +84,7 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
                     single { rainbowICE }
                 }
 
-                traewellingSynchronizer.start()
+//                traewellingSynchronizer.start()
                 notificationExecutor.start()
             }
         }

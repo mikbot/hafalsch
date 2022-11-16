@@ -9,16 +9,15 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.plugins.resources.Resources
-import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.resources.*
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import dev.schlaubi.hafalsch.marudor.entity.CoachSequence as CoachSequenceEntity
 import dev.schlaubi.hafalsch.marudor.entity.Map as StopPlaceMap
 import dev.schlaubi.hafalsch.marudor.routes.CoachSequence as CoachSequenceRoute
 import dev.schlaubi.hafalsch.marudor.routes.Hafas as HafasRoute
 import dev.schlaubi.hafalsch.marudor.routes.Iris as IrisRoute
+import dev.schlaubi.hafalsch.marudor.routes.Journeys as JourneysRoute
 import dev.schlaubi.hafalsch.marudor.routes.StopPlace as StopPlaceRoute
 
 public class Marudor(public val resoures: ClientResources) {
@@ -27,6 +26,7 @@ public class Marudor(public val resoures: ClientResources) {
     public val stopPlace: StopPlace = StopPlace()
     public val coachSequence: CoachSequence = CoachSequence()
     public val iris: Iris = Iris()
+    public val journeys: Journeys = Journeys()
 
     public inner class Hafas {
         /**
@@ -37,15 +37,7 @@ public class Marudor(public val resoures: ClientResources) {
             lookahead: Int? = null,
             lookbehind: Int? = null
         ): IrisDepartures? =
-            resoures.client.get(HafasRoute.Experimental.IrisCompatibleAbfahrten(eva, lookahead, lookbehind)).safeBody()
-
-        /**
-         * Retrieves [JourneyInformation] for specific [trainName].
-         */
-        public suspend fun details(
-            trainName: String, station: String? = null, date: Instant? = null, profile: HafasProfile? = null
-        ): JourneyInformation? =
-            resoures.client.get(HafasRoute.V2.Details(trainName, station, date, profile)).safeBody()
+            resoures.client.get(HafasRoute.V1.IrisCompatibleAbfahrten(eva, lookahead, lookbehind)).safeBody()
 
         /**
          * Returns the details redirect for [journeyId].
@@ -58,35 +50,22 @@ public class Marudor(public val resoures: ClientResources) {
             buildUrl(HafasRoute.V1.DetailsRedirect(journeyId, profile), block)
 
         /**
-         * Searches for journeys matching [name] (Useful for autocomplete).
+         * Provides additional information not provided by iris.
+         *
+         * @see Journeys.details
          */
-        public suspend fun journeyMatch(
-            name: String,
-            initialDepartureDate: Instant = Clock.System.now(),
-            filters: List<HafasJourneyMatchRequest.Filter> = emptyList(),
-            onlyRT: Boolean = false,
-            profile: HafasProfile? = null
-        ): List<HafasJourneyMatchJourney> {
-            return resoures.client.post(HafasRoute.V2.JourneyMatch(profile)) {
-                contentType(ContentType.Application.Json)
-                setBody(HafasJourneyMatchRequest(name, initialDepartureDate, filters, onlyRT))
-            }.safeBody() ?: emptyList()
-        }
-
-        /**
-         * Searches for journeys matching [name] (Useful for autocomplete) but different.
-         */
-        public suspend fun enrichedJourneyMatch(
-            name: String,
-            limit: Int = 5,
-            initialDepartureDate: Instant = Clock.System.now(),
-            filtered: Boolean = true
-        ): List<HafasJourneyMatchJourney> {
-            return resoures.client.post(HafasRoute.V1.EnrichedJourneyMatch()) {
-                contentType(ContentType.Application.Json)
-                setBody(HafasEnrichedJourneyMatchRequest(name, limit, initialDepartureDate, filtered))
-            }.body()
-        }
+        public suspend fun additionalInformation(
+            trainName: String,
+            evaNumberAlongRoute: String? = null,
+            initialDepartureDate: Instant? = null
+        ): HafasAdditionalJourneyInformation? =
+            resoures.client.get(
+                HafasRoute.V3.AdditionalInformation(
+                    trainName,
+                    evaNumberAlongRoute,
+                    initialDepartureDate
+                )
+            ).safeBody()
     }
 
     public inner class StopPlace {
@@ -141,6 +120,31 @@ public class Marudor(public val resoures: ClientResources) {
             lookbehind: Int? = null
         ): IrisDepartures? =
             resoures.client.get(IrisRoute.Departures(eva, lookahead, lookbehind)).safeBody()
+    }
+
+    public inner class Journeys {
+        /**
+         * Searches for journeys by [trainName] (useful for autocomplete)
+         *
+         * @param initialDepartureDate the initial departure date
+         * @param filtered idk marudor requests with true
+         * @param limit result limit
+         */
+        public suspend fun find(
+            trainName: String,
+            initialDepartureDate: Instant? = null,
+            filtered: Boolean = true,
+            limit: Int? = null
+        ): List<IrisJourney> =
+            resoures.client.get(JourneysRoute.Find(trainName, initialDepartureDate, filtered, limit)).safeBody()
+                ?: emptyList()
+
+        public suspend fun details(
+            trainName: String,
+            evaNumberAlongRoute: String? = null,
+            initialDepartureDate: Instant? = null
+        ): JourneyInformation? =
+            resoures.client.get(JourneysRoute.Details(trainName, evaNumberAlongRoute, initialDepartureDate)).safeBody()
     }
 
     @PublishedApi

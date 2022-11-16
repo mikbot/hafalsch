@@ -78,7 +78,7 @@ suspend inline fun <T> refreshableMultiButtonPaginator(
     locale: Locale? = null,
     initialData: T? = null,
     @BuilderInference crossinline block: RefreshablePaginatorBuilder<T>.() -> Unit
-) {
+): MultiButtonPaginator {
     val builder = RefreshablePaginatorBuilder<T>().apply(block)
     lateinit var context: PaginatorContainer
 
@@ -98,6 +98,8 @@ suspend inline fun <T> refreshableMultiButtonPaginator(
 
     context = PaginatorContainer(paginator)
     context.paginator.send()
+
+    return paginator
 }
 
 @PublishedApi

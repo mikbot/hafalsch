@@ -43,7 +43,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
                 val user = traewelling.auth.getUser(it.token)
                 val status = traewelling.user.listEnroute(it.token)?.data
                 status?.let { safeStatus ->
-                    it.id to LocalizedStatus(user.data.language, status)
+                    it.id to LocalizedStatus(user.data.language, safeStatus)
                 }
             }
             .toMap()
