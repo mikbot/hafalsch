@@ -48,6 +48,7 @@ data class CheckIn(
     val journeyId: String,
     val start: String,
     val end: String,
+    val duration: Int,
     // Delay of last notification, not real time delay
     val delays: Map<String, Int>, // Map<EVA, DELAY>
     val language: String?
@@ -89,6 +90,7 @@ data class SubscribtionSettings(
     val currentDelayMargin: Int = 5, // change-margin for delay at current stop
     val exitDelayMargin: Int = 5, // change-margin for delay at users exit stop
     val subscribeToMessages: Boolean = true,
-    val locale: String? = null
+    val locale: String? = null,
+    val welcomeMessageLength: Int = 10
 )
 

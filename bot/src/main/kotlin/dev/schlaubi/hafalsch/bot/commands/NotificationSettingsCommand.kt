@@ -22,6 +22,10 @@ class NotificationSettingsArguments : Arguments() {
         name = "subscribe-to-messages"
         description = "commands.notification_settings.arguments.subscribe_to_messages.description"
     }
+    val welcomeMessageLength by optionalInt {
+        name = "welcome-message-length"
+        description = "commands.notification_settings.arguments.welcome_message_length.description"
+    }
 }
 
 suspend fun Extension.notificationSettingsCommand() = ephemeralSlashCommand(::NotificationSettingsArguments) {

@@ -84,6 +84,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
                 start = start,
                 end = end,
                 language = trip.language,
+                duration = trip.status.train.duration,
                 delays = emptyMap()
             )
         }
@@ -94,6 +95,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
                 val state = saveState(newDetails)
                 val checkIn = it.copy(delays = state.delays)
 
+                if (Database.subscriptionSettings.findOneByIdSafe(checkIn.user).welcomeMessageLength <= checkIn.duration)
                 withUIContext(checkIn.language) {
                     checkIn.sendWelcomeMessage(state, newDetails)
                 }
