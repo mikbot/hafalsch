@@ -1,0 +1,20 @@
+query FindCoach($uic: String!){
+    coach(uic: $uic, limit:1) {
+        category
+        class
+        type
+        coach_links{
+            trip {
+                train_type
+                train_number
+                initial_departure
+                origin_station
+                destination_station
+                destination_station
+                bahn_expert
+                stops{scheduled_arrival}
+            }
+        }
+    }
+}
+

@@ -37,4 +37,9 @@ public class RainbowICE {
     public suspend fun fetchTrain(query: String, tripLimit: Int?): FetchTrainQuery.Train_vehicle? =
         apollo.query(FetchTrainQuery(query, Optional.presentIfNotNull(tripLimit))).executeSafe().train_vehicle
 
+    /**
+     * Searches for a coach by [uic] and retrieves it'c current Trip.
+     */
+    public suspend fun searchCoach(uic: String): FindCoachQuery.Data =
+        apollo.query(FindCoachQuery(uic)).executeSafe()
 }

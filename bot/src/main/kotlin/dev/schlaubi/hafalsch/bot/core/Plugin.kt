@@ -114,5 +114,6 @@ class HafalschModule : Extension() {
         notificationSettingsCommand()
         tznCommand()
         traewellingCommand()
+        coachCommand()
     }
 }

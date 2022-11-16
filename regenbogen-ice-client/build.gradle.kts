@@ -25,7 +25,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(projects.clientCommon)
-                implementation("com.apollographql.apollo3:apollo-runtime:3.7.0")
+                api("com.apollographql.apollo3:apollo-runtime:3.7.0")
             }
         }
     }
