@@ -8,10 +8,12 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.DiscordTimestampStyle
 import dev.kord.common.toMessageFormat
+import dev.kord.rest.builder.message.create.actionRow
 import dev.kord.rest.builder.message.create.embed
 import dev.schlaubi.hafalsch.rainbow_ice.FindCoachQuery
 import dev.schlaubi.hafalsch.rainbow_ice.RainbowICE
 import dev.schlaubi.mikbot.plugin.api.util.discordError
+import io.ktor.http.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.koin.core.component.inject
@@ -84,6 +86,15 @@ suspend fun Extension.coachCommand() = publicSlashCommand(::CoachArguments) {
                             journey(it.trip)
                         }.joinToString("\n") { "- $it" }
                     }
+                }
+            }
+
+            actionRow {
+                val url = URLBuilder(rainbow.serverUrl).apply {
+                    path("coach", arguments.uic)
+                }.buildString()
+                linkButton(url) {
+                    label = translate("commands.coach.history")
                 }
             }
         }

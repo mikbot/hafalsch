@@ -7,11 +7,11 @@ import dev.schlaubi.hafalsch.rainbow_ice.util.executeSafe
 /**
  * Mapper of the [regenbogen-ice.de](regenbogen-ice.de) API.
  *
- * You might need to import [dev.schlaubi.hafalsch.client.invoke] to use [RainbowICEBuilder]
+ * @property serverUrl
  */
-public class RainbowICE {
+public class RainbowICE(public val serverUrl: String = "https://regenbogen-ice.de") {
     private val apollo = ApolloClient.Builder()
-        .serverUrl("https://regenbogen-ice.de/graphql")
+        .serverUrl("$serverUrl/graphql")
         .build()
 
     /**

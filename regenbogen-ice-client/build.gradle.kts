@@ -24,7 +24,6 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(projects.clientCommon)
                 api("com.apollographql.apollo3:apollo-runtime:3.7.0")
             }
         }
