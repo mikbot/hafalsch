@@ -61,11 +61,12 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
             checkin.status.train.hafasId !in (knownCheckins[user] ?: emptyList())
         }
 
+        @Suppress("UNCHECKED_CAST")
         val journeyDetails = newCheckIns.values
             .groupBy { it.status.train.hafasId }
             .keys
-            .mapNotNull { marudor.detailsByJourneyId(it) }
-            .associateBy(JourneyInformation::journeyId)
+            .associateWith { marudor.detailsByJourneyId(it) }
+            .filterValues { it != null } as Map<String, JourneyInformation>
 
 
         checkIns.forEach { (user, checkIn) ->
@@ -95,9 +96,10 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
                 val state = saveState(newDetails)
                 val checkIn = it.copy(delays = state.delays)
 
-                if (Database.subscriptionSettings.findOneByIdSafe(checkIn.user).welcomeMessageLength <= checkIn.duration)
-                withUIContext(checkIn.language) {
-                    checkIn.sendWelcomeMessage(state, newDetails)
+                if (Database.subscriptionSettings.findOneByIdSafe(checkIn.user).welcomeMessageLength <= checkIn.duration) {
+                    withUIContext(checkIn.language) {
+                        checkIn.sendWelcomeMessage(state, newDetails)
+                    }
                 }
 
                 checkIn

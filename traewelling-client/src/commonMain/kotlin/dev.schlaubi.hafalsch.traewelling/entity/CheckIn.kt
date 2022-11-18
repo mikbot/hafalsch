@@ -93,7 +93,7 @@ public data class TrainStopOver(
     val departureReal: Instant?,
     val departurePlatformPlanned: String?,
     val departurePlatformReal: String?,
-    val platform: String,
+    val platform: String?,
     val isArrivalDelayed: Boolean,
     val isDepartureDelayed: Boolean,
     val cancelled: Boolean
