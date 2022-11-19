@@ -117,11 +117,12 @@ private suspend fun UIContext.sendStatus(
     suspend fun MutableList<EmbedBuilder>.addDelayChange(
         stationId: String,
         limit: Int,
-        type: String
+        type: String,
+        delays: Map<String, Int> = checkIn.delays
     ): Map<String, Int> {
-        val stop = currentStatus.stops.firstOrNull { it.station.id == stationId } ?: return checkIn.delays
-        val arrival = stop.arrival ?: return checkIn.delays
-        val previousDelay = checkIn.delays[stationId] ?: 0
+        val stop = currentStatus.stops.firstOrNull { it.station.id == stationId } ?: return delays
+        val arrival = stop.arrival ?: return delays
+        val previousDelay = delays[stationId] ?: 0
         return if (delayDifference(arrival.delay ?: 0, previousDelay) >= limit) {
             embed {
                 title = translate("notification.delay_change.$type.title", currentStatus.train.name)
@@ -170,9 +171,11 @@ private suspend fun UIContext.sendStatus(
                 }
             }
 
-            (checkIn.delays - stationId) + (stationId to (arrival.delay ?: 0))
+            delays.toMutableMap().apply {
+                this[stationId] = arrival.delay ?: 0
+            }
         } else {
-            checkIn.delays
+            delays
         }
     }
 
@@ -188,7 +191,7 @@ private suspend fun UIContext.sendStatus(
             }
         }
         if (notificationSettings.exitDelayMargin != 0) {
-            delays = addDelayChange(checkIn.end, notificationSettings.currentDelayMargin, "at_exit")
+            delays = addDelayChange(checkIn.end, notificationSettings.currentDelayMargin, "at_exit", delays)
         }
 
         // Update delay notification state
