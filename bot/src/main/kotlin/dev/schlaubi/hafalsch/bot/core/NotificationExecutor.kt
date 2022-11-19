@@ -18,6 +18,7 @@ import dev.schlaubi.hafalsch.bot.util.embed
 import dev.schlaubi.hafalsch.bot.util.showTrainInfo
 import dev.schlaubi.hafalsch.marudor.Marudor
 import dev.schlaubi.hafalsch.marudor.entity.JourneyInformation
+import dev.schlaubi.hafalsch.marudor.entity.IrisMessage
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
