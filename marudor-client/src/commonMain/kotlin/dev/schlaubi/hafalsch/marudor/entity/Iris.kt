@@ -26,7 +26,7 @@ public data class IrisMessage(
 ){
     override fun equals(other: Any?): Boolean {
         if (other !is IrisMessage) return false
-        return other.value == value && other.stopPlace == stopPlace && other.superseded == superseded
+        return other.value == value && other.superseded == superseded
     }
 
     override fun hashCode(): Int {
