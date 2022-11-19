@@ -32,7 +32,6 @@ public data class IrisMessage(
     override fun hashCode(): Int {
         var result = superseded.hashCode()
         result = 31 * result + (value ?: 0)
-        result = 31 * result + (stopPlace?.hashCode() ?: 0)
         return result
     }
 

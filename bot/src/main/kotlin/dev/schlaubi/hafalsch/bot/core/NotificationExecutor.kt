@@ -199,8 +199,9 @@ private suspend fun UIContext.sendStatus(
             Database.checkIns.save(checkIn.copy(delays = delays))
         }
 
+        val oldCodes = previousStatus?.messages?.map(IrisMessage::text) ?: emptyList()
         val newMessages = currentStatus.currentStop?.irisMessages
-            ?.filter { it !in (previousStatus?.messages ?: emptyList()) }
+            ?.filter { it.text !in oldCodes }
             ?.filterRelevant()
             ?: emptyList()
 
