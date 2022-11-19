@@ -62,7 +62,7 @@ class NotificationExecutor : RepeatingTask() {
                         Database.journeyStates.deleteOneById(journeyId)
                         Database.checkIns.deleteMany(CheckIn::journeyId eq journeyId)
                     } else {
-                        val currentState = currentStatus.toState()
+                        val currentState = currentStatus.toState(journeyId)
                         Database.journeyStates.save(currentState)
 
                         if (currentSavedStatus != currentState) {
@@ -101,8 +101,8 @@ private fun delayDifference(current: Int?, before: Int?): Int {
     return abs(safeCurrent - safeBefore)
 }
 
-suspend fun saveState(information: JourneyInformation): JourneyState {
-    val state = information.toState()
+suspend fun saveState(hafasId: String, information: JourneyInformation): JourneyState {
+    val state = information.toState(hafasId)
     Database.journeyStates.save(state)
 
     return state
@@ -201,12 +201,14 @@ private suspend fun UIContext.sendStatus(
         }
 
         val oldCodes = previousStatus?.messages?.map(IrisMessage::text) ?: emptyList()
+        println(oldCodes)
         val newMessages = currentStatus.currentStop?.irisMessages
             ?.filter { it.text !in oldCodes }
             ?.filterRelevant()
             ?: emptyList()
+        println(newMessages.map(IrisMessage::text))
 
-        if (newMessages.isNotEmpty()) {
+        if (newMessages.isNotEmpty() && notificationSettings.subscribeToMessages) {
             embed {
                 title = translate("notification.new_messages", newMessages.size, currentStatus.train.name)
                 description = newMessages.format()
@@ -226,8 +228,8 @@ private suspend fun UIContext.sendStatus(
     }
 }
 
-private fun JourneyInformation.toState() = JourneyState(
-    journeyId, currentStop?.irisMessages ?: emptyList(), stops.associate {
+private fun JourneyInformation.toState(hafasId: String) = JourneyState(
+    hafasId, currentStop?.irisMessages ?: emptyList(), stops.associate {
         it.station.id to (it.arrival?.delay ?: 0)
     }
 )

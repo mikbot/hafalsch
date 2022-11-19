@@ -84,7 +84,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
                 journeyId = trip.status.train.hafasId,
                 start = start,
                 end = end,
-                language = trip.language,
+                language = trip.language?.take(2), // cut of dialect
                 duration = trip.status.train.duration,
                 delays = emptyMap()
             )
@@ -93,7 +93,7 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
         coroutineScope {
             val fullCheckIns = dbCheckIns.parallelMapNotNull {
                 val newDetails = journeyDetails[it.journeyId] ?: return@parallelMapNotNull null
-                val state = saveState(newDetails)
+                val state = saveState(it.journeyId, newDetails)
                 val checkIn = it.copy(delays = state.delays)
 
                 if (Database.subscriptionSettings.findOneByIdSafe(checkIn.user).welcomeMessageLength <= checkIn.duration) {
