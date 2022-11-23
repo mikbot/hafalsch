@@ -34,6 +34,7 @@ data class TraevellingUserLogin(
     @SerialName("_id")
     val id: Snowflake,
     val token: String,
+    val refreshToken: String,
     @Serializable(with = DateSerializer::class)
     val expiresAt: Instant,
     val userId: Int

@@ -20,12 +20,23 @@ dependencies {
     mikbot("dev.schlaubi", "mikbot-api", "3.15.0-SNAPSHOT")
     ksp("dev.schlaubi", "mikbot-plugin-processor", "2.2.0")
     ksp("com.kotlindiscord.kord.extensions", "annotation-processor", "1.5.5-SNAPSHOT")
+    plugin("dev.schlaubi", "mikbot-ktor", "2.8.0")
 
     implementation(projects.marudorClient)
     implementation(projects.traewellingClient)
     implementation(projects.regenbogenIceClient)
     implementation("io.ktor", "ktor-client-logging", "2.0.3")
     implementation("info.debatty", "java-string-similarity", "2.0.0")
+    implementation(platform("io.ktor:ktor-bom:2.1.3"))
+    implementation("io.ktor", "ktor-server-auth-jvm")
+    implementation("io.ktor", "ktor-server-sessions-jvm")
+}
+
+configurations {
+    runtimeClasspath {
+        exclude("io.ktor", "ktor-resources-jvm")
+        exclude("io.ktor", "ktor-server-core")
+    }
 }
 
 mikbotPlugin {
@@ -58,5 +69,9 @@ tasks {
 
     assemblePlugin {
         dependsOn(generateDefaultResourceBundle)
+    }
+
+    assembleBot {
+        bundledPlugins.add("ktor@2.8.0")
     }
 }

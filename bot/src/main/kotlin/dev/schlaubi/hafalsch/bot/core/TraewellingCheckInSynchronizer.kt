@@ -9,6 +9,7 @@ import dev.kord.rest.builder.message.create.embed
 import dev.schlaubi.hafalsch.bot.config.Config
 import dev.schlaubi.hafalsch.bot.database.*
 import dev.schlaubi.hafalsch.bot.ui.format
+import dev.schlaubi.hafalsch.bot.ui.modify
 import dev.schlaubi.hafalsch.bot.ui.withUIContext
 import dev.schlaubi.hafalsch.bot.util.detailsByJourneyId
 import dev.schlaubi.hafalsch.bot.util.showTrainInfo
@@ -163,9 +164,9 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
 
                         linkButton {
                             label = "Träwelling.de"
-                            url = URLBuilder(urlString = Config.TRAEWELLING_API).apply {
+                            url = Config.TRAEWELLING_API.modify {
                                 path("status", traewellingId.toString())
-                            }.buildString()
+                            }
                         }
                     }
                 }

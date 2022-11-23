@@ -91,7 +91,9 @@ class Plugin(wrapper: PluginWrapper) : Plugin(wrapper) {
     }
 
     override fun stop() {
-        traewellingSynchronizer.cancel()
+        if(Config.SYNC_TRAEWELLING) {
+            traewellingSynchronizer.cancel()
+        }
         notificationExecutor.cancel()
     }
 
