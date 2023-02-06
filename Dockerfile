@@ -1,4 +1,4 @@
-FROM gradle:jdk18 as builder
+FROM gradle:jdk19 as builder
 WORKDIR /usr/app
 COPY . .
 RUN gradle --no-daemon bot:installBotArchive

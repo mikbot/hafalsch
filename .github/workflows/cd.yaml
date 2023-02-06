@@ -9,6 +9,7 @@ on:
       - marudor-client/**
       - regenbogen-ice-client/**
       - träwelling-client/**
+  workflow_dispatch:
 
 env:
   ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_KEY }}
@@ -21,11 +22,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 18
+      - name: Set up JDK 19
         uses: actions/setup-java@v1
         with:
           distribution: 'temurin'
-          java-version: 18
+          java-version: 19
       - name: Publish with Gradle
         uses: gradle/gradle-build-action@v2
         with:
