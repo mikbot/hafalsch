@@ -147,26 +147,25 @@ class TraewellingCheckInSynchronizer : RepeatingTask() {
                             value = relevantMessages.format()
                         }
                     }
+                }
+                components {
+                    showTrainInfo(details)
 
-                    components {
-                        showTrainInfo(details)
-
-                        if (details.train.type?.matches("ICE?".toRegex()) == true) {
-                            linkButton {
-                                label = "ICE Portal"
-                                url = "https://iceportal.de"
-                            }
-                        }
+                    if (details.train.type?.matches("ICE?".toRegex()) == true) {
                         linkButton {
-                            label = "bahn.expert"
-                            url = marudor.hafas.detailsRedirect(journeyId)
+                            label = "ICE Portal"
+                            url = "https://iceportal.de"
                         }
+                    }
+                    linkButton {
+                        label = "bahn.expert"
+                        url = marudor.hafas.detailsRedirect(journeyId)
+                    }
 
-                        linkButton {
-                            label = "Träwelling.de"
-                            url = Config.TRAEWELLING_API.modify {
-                                path("status", traewellingId.toString())
-                            }
+                    linkButton {
+                        label = "Träwelling.de"
+                        url = Config.TRAEWELLING_API.modify {
+                            path("status", traewellingId.toString())
                         }
                     }
                 }
