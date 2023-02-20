@@ -1,4 +1,6 @@
 # hafalsch
+**marudor disabled the APIs required for this**
+
 marudor.de for Discord
 
 # Features
